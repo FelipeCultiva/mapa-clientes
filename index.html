@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
+<title>Mapa de Clientes · Ejecutivo</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"/>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.5.3/MarkerCluster.css"/>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.5.3/MarkerCluster.Default.css"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.5.3/leaflet.markercluster.min.js"></script>
+<style>
+:root {
+  --bg:       #070E1A;
+  --panel:    #0B1525;
+  --panel2:   #0F1C30;
+  --border:   rgba(255,255,255,.07);
+  --gold:     #C9A227;
+  --gold-dim: rgba(201,162,39,.14);
+  --gold-ring:rgba(201,162,39,.35);
+  --teal:     #2DD4BF;
+  --purple:   #818CF8;
+  --red:      #EF4444;
+  --green:    #22C55E;
+  --blue:     #60A5FA;
+  --text:     #E2E8F0;
+  --sub:      #94A3B8;
+  --muted:    #4B5563;
+  --r:        11px;
+  --shadow:   0 0 0 1px var(--border), 0 20px 40px rgba(0,0,0,.65);
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html, body {
+  height: 100%; height: 100dvh; overflow: hidden;
+  background: var(--bg); color: var(--text);
+  font-family: -apple-system, 'Inter', BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  -webkit-tap-highlight-color: transparent; -webkit-font-smoothing: antialiased;
+}
+
+#map { position: absolute; inset: 0; z-index: 1; }
+
+#topbar {
+  position: absolute; top: 0; left: 0; right: 0; height: 56px;
+  display: flex; align-items: center; justify-content: space-between; padding: 0 14px;
+  background: linear-gradient(180deg, rgba(7,14,26,.97) 60%, rgba(7,14,26,0));
+  z-index: 500; gap: 10px;
+}
+.tb-brand { display: flex; flex-direction: column; min-width: 0; flex-shrink: 1; }
+#tb-title { font-size: 13.5px; font-weight: 700; color: #F1F5F9; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+#tb-status { font-size: 10px; color: var(--sub); display: flex; align-items: center; gap: 5px; margin-top: 2px; }
+.s-dot { width: 5px; height: 5px; border-radius: 50%; flex-shrink: 0; transition: background .3s; }
+
+.tb-actions { display: flex; align-items: center; gap: 7px; flex-shrink: 0; }
+#search-wrap { position: relative; display: flex; align-items: center; }
+#search {
+  background: rgba(255,255,255,.06); border: 1px solid var(--border); border-radius: 8px;
+  color: var(--text); font-size: 12px; padding: 6px 10px 6px 28px; outline: none; width: 150px; transition: width .2s, border-color .2s;
+}
+#search:focus { border-color: var(--gold-ring); width: 190px; }
+#search::placeholder { color: var(--muted); }
+.s-icon { position: absolute; left: 8px; color: var(--muted); font-size: 12px; pointer-events: none; }
+
+/* Botón de Geocodificación dinámico */
+.btn-geo {
+  background: var(--gold-dim); border: 1px solid var(--gold-ring); color: var(--gold);
+  font-size: 11px; font-weight: 600; padding: 6px 10px; border-radius: 8px; cursor: pointer;
+  display: flex; align-items: center; gap: 5px; transition: .15s; white-space: nowrap;
+}
+.btn-geo:hover { background: rgba(201,162,39,.25); border-color: var(--gold); }
+.btn-geo.hidden { display: none !important; }
+
+.iBtn {
+  width: 32px; height: 32px; background: rgba(255,255,255,.05); border: 1px solid var(--border);
+  border-radius: 8px; color: var(--sub); cursor: pointer; display: flex; align-items: center; justify-content: center;
+  font-size: 14px; transition: .15s; flex-shrink: 0;
+}
+.iBtn:hover { background: rgba(255,255,255,.1); color: var(--text); }
+@keyframes spin { to { transform: rotate(360deg); } }
+.spinning { animation: spin .65s linear; }
+
+/* MODAL CONFIRMACIÓN */
+.modal-overlay {
+  position: fixed; inset: 0; background: rgba(0,0,0,.75); backdrop-filter: blur(4px);
+  z-index: 2000; display: flex; align-items: center; justify-content: center; padding: 16px;
+  opacity: 0; pointer-events: none; transition: opacity .2s;
+}
+.modal-overlay.open { opacity: 1; pointer-events: auto; }
+.modal-card {
+  background: var(--panel); border: 1px solid var(--border); border-radius: 14px;
+  box-shadow: var(--shadow); width: 100%; max-width: 340px; padding: 18px; text-align: center;
+}
+.modal-title { font-size: 15px; font-weight: 700; color: #fff; margin-bottom: 8px; }
+.modal-desc { font-size: 12px; color: var(--sub); line-height: 1.4; margin-bottom: 18px; }
+.modal-actions { display: flex; gap: 8px; }
+.mBtn {
+  flex: 1; padding: 9px 0; border-radius: 8px; font-size: 12px; font-weight: 600; cursor: pointer; border: none; transition: .15s;
+}
+.mBtn-cancel { background: rgba(255,255,255,.06); color: var(--sub); border: 1px solid var(--border); }
+.mBtn-cancel:hover { background: rgba(255,255,255,.1); color: #fff; }
+.mBtn-confirm { background: var(--gold); color: #000; }
+.mBtn-confirm:hover { background: #E5B82E; }
+
+/* PANELS & LEAFLET STYLES */
+.panel {
+  position: absolute; background: rgba(11,21,37,.96); backdrop-filter: blur(14px);
+  border: 1px solid var(--border); border-radius: var(--r); box-shadow: var(--shadow);
+  z-index: 400; display: flex; flex-direction: column; overflow: hidden; transition: opacity .2s, transform .2s;
+}
+.panel.hidden { display: none; }
+#p-layers { top: 64px; left: 12px; width: 236px; max-height: calc(100dvh - 80px); }
+#p-kpis   { top: 64px; right: 12px; width: 268px; max-height: calc(100dvh - 80px); }
+.p-header { display: flex; align-items: center; justify-content: space-between; padding: 10px 12px; border-bottom: 1px solid var(--border); cursor: grab; user-select: none; flex-shrink: 0; }
+.p-title { font-size: 11.5px; font-weight: 600; display: flex; align-items: center; gap: 6px; letter-spacing: .02em; }
+.xBtn { width: 22px; height: 22px; border-radius: 6px; border: none; background: transparent; color: var(--muted); cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 12px; }
+.xBtn:hover { background: rgba(239,68,68,.18); color: #FCA5A5; }
+.p-body { overflow-y: auto; padding: 11px; flex: 1; }
+
+.layer-blk { margin-bottom: 9px; padding-bottom: 9px; border-bottom: 1px solid var(--border); }
+.layer-lbl { font-size: 9.5px; font-weight: 700; text-transform: uppercase; letter-spacing: .1em; color: var(--sub); margin-bottom: 5px; }
+.chip { width: 100%; text-align: left; background: transparent; border: none; color: var(--sub); font-size: 12px; padding: 5px 8px; border-radius: 7px; cursor: pointer; display: flex; align-items: center; gap: 7px; }
+.chip.on { background: var(--gold-dim); color: var(--gold); box-shadow: inset 0 0 0 1px var(--gold-ring); }
+.chip-name { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.chip-n { font-family: monospace; font-size: 10px; color: var(--muted); }
+.cdot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+
+.kpi-ctx { margin-bottom: 11px; padding-bottom: 10px; border-bottom: 1px solid var(--border); }
+.kpi-lbl { font-size: 9px; text-transform: uppercase; letter-spacing: .1em; color: var(--muted); }
+.kpi-val { font-size: 14px; font-weight: 700; color: var(--gold); margin-top: 2px; }
+.kpi-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+.kcard { background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.06); border-radius: 8px; padding: 9px 10px; }
+.kcard.full { grid-column: 1/-1; }
+.kcard .kk { font-size: 9px; text-transform: uppercase; color: var(--muted); margin-bottom: 4px; }
+.kcard .kv { font-family: monospace; font-size: 18px; font-weight: 700; color: #fff; }
+.kcard .kv.green { color: var(--green); }
+
+.pop { padding: 14px 16px; min-width: 185px; max-width: 230px; }
+.pop-name { font-size: 13px; font-weight: 700; color: #fff; margin-bottom: 8px; }
+.pop-row { font-size: 11px; color: var(--sub); margin-bottom: 2px; display: flex; }
+.pop-k { color: var(--muted); font-size: 10px; width: 62px; flex-shrink: 0; }
+.pop-saldo { font-family: monospace; font-size: 15px; font-weight: 700; color: var(--green); margin-top: 6px; }
+
+#tray { position: absolute; bottom: 12px; left: 12px; display: flex; gap: 7px; z-index: 400; }
+.tray-pill { background: rgba(11,21,37,.93); border: 1px solid var(--border); border-radius: 9px; padding: 7px 12px; font-size: 11.5px; color: var(--sub); cursor: pointer; }
+</style>
+</head>
+<body>
+
+<div id="map"></div>
+
+<!-- TOPBAR -->
+<div id="topbar">
+  <div class="tb-brand">
+    <div id="tb-title">🗺 Mapa de Clientes · Ejecutivo</div>
+    <div id="tb-status"><span class="s-dot" id="s-dot" style="background:#4B5563"></span><span id="s-txt">Iniciando…</span></div>
+  </div>
+  <div class="tb-actions">
+    <!-- BOTÓN DINÁMICO DE GEOCODIFICACIÓN -->
+    <button class="btn-geo hidden" id="btn-geocodificar" title="Existen registros sin geolocalizar">
+      <span>📍</span> <span id="geo-count">Geocodificar (0)</span>
+    </button>
+
+    <div id="search-wrap">
+      <span class="s-icon">🔍</span>
+      <input id="search" type="search" placeholder="Buscar cliente…" autocomplete="off"/>
+    </div>
+    <button class="iBtn" id="btn-refresh" title="Actualizar datos">⟳</button>
+  </div>
+</div>
+
+<!-- MODAL CONFIRMACIÓN GEOCODIFICACIÓN -->
+<div class="modal-overlay" id="modal-geo">
+  <div class="modal-card">
+    <div class="modal-title">📍 Geocodificación de Direcciones</div>
+    <div class="modal-desc" id="modal-geo-txt">
+      Se detectaron registros con dirección pero sin coordenadas. ¿Deseas iniciar la geolocalización automática ahora?
+    </div>
+    <div class="modal-actions">
+      <button class="mBtn mBtn-cancel" id="btn-modal-cancel">Cancelar</button>
+      <button class="mBtn mBtn-confirm" id="btn-modal-confirm">Sí, procesar</button>
+    </div>
+  </div>
+</div>
+
+<!-- PANEL CAPAS -->
+<div class="panel" id="p-layers">
+  <div class="p-header" data-drag="p-layers">
+    <span class="p-title">🗂 Capas geográficas</span>
+    <button class="xBtn" data-close="p-layers">✕</button>
+  </div>
+  <div class="p-body" id="layers-body"></div>
+</div>
+
+<!-- PANEL KPIs -->
+<div class="panel" id="p-kpis">
+  <div class="p-header" data-drag="p-kpis">
+    <span class="p-title">📊 Totalizador ejecutivo</span>
+    <button class="xBtn" data-close="p-kpis">✕</button>
+  </div>
+  <div class="p-body" id="kpis-body"></div>
+</div>
+
+<div id="tray"></div>
+
+<script>
+const SHEET_API_URL = "https://script.google.com/macros/s/AKfycbxSG4sQmtinjN2pvesuC9L85jxgTCXUsydgs-v_b1fz0KLAlsBtgWMYmfHP-o8DqECAJw/exec";
+const REFRESH_MS    = 30_000;
+
+let CLIENTES = [];
+let PENDIENTES_COUNT = 0;
+let filtro = { empresa:null, region:null, territorio:null, agencia:null, asesor:null };
+
+const STATUS_COLORS = { ok:'#22C55E', loading:'#C9A227', error:'#EF4444' };
+function setStatus(type, txt){
+  document.getElementById('s-dot').style.background = STATUS_COLORS[type] || '#4B5563';
+  document.getElementById('s-txt').textContent = txt;
+}
+
+// CARGAR DATOS
+async function cargarDatos(){
+  if(!SHEET_API_URL) return;
+  setStatus('loading','Actualizando…');
+  try{
+    const r = await fetch(SHEET_API_URL, {cache:'no-store'});
+    const j = await r.json();
+    if(!j.ok) throw new Error(j.error||'Error');
+    CLIENTES = j.clientes.map(c=>({...c, id:Number(c.id)}));
+    PENDIENTES_COUNT = j.pendientes || 0;
+    
+    // Control visual del botón dinámico de geocodificación
+    const btnGeo = document.getElementById('btn-geocodificar');
+    if (PENDIENTES_COUNT > 0) {
+      document.getElementById('geo-count').textContent = `Geocodificar (${PENDIENTES_COUNT})`;
+      btnGeo.classList.remove('hidden');
+    } else {
+      btnGeo.classList.add('hidden');
+    }
+
+    const t = new Date(j.actualizado).toLocaleTimeString('es-MX',{hour:'2-digit',minute:'2-digit'});
+    setStatus('ok', `Google Sheets ✓ ${t} · ${CLIENTES.length} clientes`);
+  }catch(err){
+    console.error(err);
+    setStatus('error','Sin conexión');
+  }
+}
+
+// PROCESAR GEOCODIFICACIÓN DESDE EL FRONTEND
+async function ejecutarGeocodificacionAPI() {
+  const modalTxt = document.getElementById('modal-geo-txt');
+  modalTxt.textContent = "Procesando coordenadas en Google Sheets... Por favor espera.";
+  
+  try {
+    const r = await fetch(SHEET_API_URL, {
+      method: 'POST',
+      body: JSON.stringify({ action: "geocodificar" })
+    });
+    const j = await r.json();
+    
+    if (j.ok) {
+      if (j.limiteAlcanzado) {
+        alert(`⚠️ Cuota Diaria Alcanzada\n\n${j.mensaje}`);
+      } else {
+        alert(`✓ ¡Proceso Exitoso!\n\n${j.mensaje}`);
+      }
+    } else {
+      alert(`⚠ Atención: ${j.error}`);
+    }
+  } catch(e) {
+    alert("El proceso se ha puesto en marcha. Si la cuota diaria fue rebasada, el proceso nocturno automático completará las direcciones restantes a la 1:00 AM.");
+  }
+  
+  document.getElementById('modal-geo').classList.remove('open');
+  await cargarDatos();
+  reconstruirMarcadores();
+  render(false);
+}
+
+// MAPA Y RENDERIZADO
+const map = L.map('map',{zoomControl:true}).setView([19.43,-99.14],10);
+L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',{maxZoom:20}).addTo(map);
+
+const cluster = L.markerClusterGroup();
+map.addLayer(cluster);
+
+const fmt = n=>'$'+Number(n).toLocaleString('es-MX',{maximumFractionDigits:0});
+
+function reconstruirMarcadores(){
+  cluster.clearLayers();
+  const markers = CLIENTES.map(c=>{
+    const m = L.circleMarker([c.lat,c.lng],{
+      radius:7, color:'#070E1A', weight:1.5,
+      fillColor:c.atraso?'#EF4444':'#2DD4BF', fillOpacity:.92,
+    });
+    m.bindPopup(`<div class="pop">
+      <div class="pop-name">${c.nombre}</div>
+      <div class="pop-row"><span class="pop-k">Ejecutivo</span>${c.asesor}</div>
+      <div class="pop-row"><span class="pop-k">Agencia</span>${c.agencia}</div>
+      <div class="pop-saldo">${fmt(c.saldo)}</div>
+    </div>`);
+    m.clienteData = c;
+    return m;
+  });
+  cluster.addLayers(markers);
+}
+
+function filtrados(){
+  const q = document.getElementById('search').value.toLowerCase().trim();
+  return CLIENTES.filter(c=>
+    (!filtro.empresa || c.empresa === filtro.empresa) &&
+    (!q || c.nombre.toLowerCase().includes(q) || (c.asesor||'').toLowerCase().includes(q))
+  );
+}
+
+function renderKPIs(){
+  const d = filtrados();
+  const cartera = d.reduce((s,c)=>s+c.saldo,0);
+  document.getElementById('kpis-body').innerHTML = `
+    <div class="kpi-ctx"><div class="kpi-lbl">Vista general</div><div class="kpi-val">${d.length} Clientes</div></div>
+    <div class="kpi-grid">
+      <div class="kcard full"><div class="kk">Cartera Total</div><div class="kv green">${fmt(cartera)}</div></div>
+    </div>
+  `;
+}
+
+function renderFiltros(){
+  document.getElementById('layers-body').innerHTML = `<div class="layer-blk"><div class="layer-lbl">Compañías</div></div>`;
+}
+
+function render(){
+  renderFiltros();
+  renderKPIs();
+}
+
+// EVENTOS DE MODAL Y BOTONES
+document.getElementById('btn-geocodificar').addEventListener('click', ()=>{
+  document.getElementById('modal-geo-txt').textContent = 
+    `Se han detectado ${PENDIENTES_COUNT} registros con dirección que aún no tienen coordenadas. ¿Deseas correr el proceso de geolocalización ahora?`;
+  document.getElementById('modal-geo').classList.open = true;
+  document.getElementById('modal-geo').classList.add('open');
+});
+
+document.getElementById('btn-modal-cancel').addEventListener('click', ()=>{
+  document.getElementById('modal-geo').classList.remove('open');
+});
+
+document.getElementById('btn-modal-confirm').addEventListener('click', ()=>{
+  ejecutarGeocodificacionAPI();
+});
+
+document.getElementById('btn-refresh').addEventListener('click', async ()=>{
+  await cargarDatos();
+  reconstruirMarcadores();
+  render();
+});
+
+(async function init(){
+  await cargarDatos();
+  reconstruirMarcadores();
+  render();
+  setInterval(async()=>{
+    await cargarDatos();
+    reconstruirMarcadores();
+    render();
+  }, REFRESH_MS);
+})();
+</script>
+</body>
+</html>
