@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
-<title>Mapa de Clientes · Ejecutivo</title>
+<title>Mapa de Clientes · Cartera y Pagaré Dinámicos</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"/>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.5.3/MarkerCluster.css"/>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.5.3/MarkerCluster.Default.css"/>
@@ -22,7 +22,7 @@
   --purple:   #818CF8;
   --red:      #EF4444;
   --green:    #22C55E;
-  --blue:     #60A5FA;
+  --blue:     #38BDF8;
   --text:     #E2E8F0;
   --sub:      #94A3B8;
   --muted:    #4B5563;
@@ -60,7 +60,6 @@ html, body {
 #search::placeholder { color: var(--muted); }
 .s-icon { position: absolute; left: 8px; color: var(--muted); font-size: 12px; pointer-events: none; }
 
-/* Botón de Geocodificación dinámico */
 .btn-geo {
   background: var(--gold-dim); border: 1px solid var(--gold-ring); color: var(--gold);
   font-size: 11px; font-weight: 600; padding: 6px 10px; border-radius: 8px; cursor: pointer;
@@ -92,52 +91,105 @@ html, body {
 .modal-title { font-size: 15px; font-weight: 700; color: #fff; margin-bottom: 8px; }
 .modal-desc { font-size: 12px; color: var(--sub); line-height: 1.4; margin-bottom: 18px; }
 .modal-actions { display: flex; gap: 8px; }
-.mBtn {
-  flex: 1; padding: 9px 0; border-radius: 8px; font-size: 12px; font-weight: 600; cursor: pointer; border: none; transition: .15s;
-}
+.mBtn { flex: 1; padding: 9px 0; border-radius: 8px; font-size: 12px; font-weight: 600; cursor: pointer; border: none; transition: .15s; }
 .mBtn-cancel { background: rgba(255,255,255,.06); color: var(--sub); border: 1px solid var(--border); }
 .mBtn-cancel:hover { background: rgba(255,255,255,.1); color: #fff; }
 .mBtn-confirm { background: var(--gold); color: #000; }
 .mBtn-confirm:hover { background: #E5B82E; }
 
-/* PANELS & LEAFLET STYLES */
+/* PANELS & STYLES */
 .panel {
   position: absolute; background: rgba(11,21,37,.96); backdrop-filter: blur(14px);
   border: 1px solid var(--border); border-radius: var(--r); box-shadow: var(--shadow);
   z-index: 400; display: flex; flex-direction: column; overflow: hidden; transition: opacity .2s, transform .2s;
 }
 .panel.hidden { display: none; }
-#p-layers { top: 64px; left: 12px; width: 236px; max-height: calc(100dvh - 80px); }
-#p-kpis   { top: 64px; right: 12px; width: 268px; max-height: calc(100dvh - 80px); }
+#p-layers { top: 64px; left: 12px; width: 270px; max-height: calc(100dvh - 80px); }
+#p-kpis   { top: 64px; right: 12px; width: 310px; max-height: calc(100dvh - 80px); }
 .p-header { display: flex; align-items: center; justify-content: space-between; padding: 10px 12px; border-bottom: 1px solid var(--border); cursor: grab; user-select: none; flex-shrink: 0; }
 .p-title { font-size: 11.5px; font-weight: 600; display: flex; align-items: center; gap: 6px; letter-spacing: .02em; }
 .xBtn { width: 22px; height: 22px; border-radius: 6px; border: none; background: transparent; color: var(--muted); cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 12px; }
 .xBtn:hover { background: rgba(239,68,68,.18); color: #FCA5A5; }
 .p-body { overflow-y: auto; padding: 11px; flex: 1; }
 
-.layer-blk { margin-bottom: 9px; padding-bottom: 9px; border-bottom: 1px solid var(--border); }
-.layer-lbl { font-size: 9.5px; font-weight: 700; text-transform: uppercase; letter-spacing: .1em; color: var(--sub); margin-bottom: 5px; }
-.chip { width: 100%; text-align: left; background: transparent; border: none; color: var(--sub); font-size: 12px; padding: 5px 8px; border-radius: 7px; cursor: pointer; display: flex; align-items: center; gap: 7px; }
-.chip.on { background: var(--gold-dim); color: var(--gold); box-shadow: inset 0 0 0 1px var(--gold-ring); }
-.chip-name { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.chip-n { font-family: monospace; font-size: 10px; color: var(--muted); }
-.cdot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+.layer-group { margin-bottom: 8px; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; background: rgba(255,255,255,.02); }
+.layer-hdr {
+  display: flex; align-items: center; justify-content: space-between; padding: 7px 10px;
+  background: rgba(255,255,255,.04); cursor: pointer; font-size: 11px; font-weight: 700;
+  color: var(--text); user-select: none;
+}
+.layer-hdr:hover { background: rgba(255,255,255,.07); }
+.layer-cnt { padding: 6px 8px; display: flex; flex-direction: column; gap: 4px; max-height: 180px; overflow-y: auto; }
+.layer-cnt.closed { display: none; }
+
+.check-item {
+  display: flex; align-items: center; gap: 7px; font-size: 11.5px; color: var(--sub);
+  cursor: pointer; padding: 3px 4px; border-radius: 5px; transition: .12s;
+}
+.check-item:hover { background: rgba(255,255,255,.05); color: var(--text); }
+.check-item input[type="checkbox"] { accent-color: var(--gold); cursor: pointer; width: 14px; height: 14px; }
+.check-item .lbl-txt { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.check-item .lbl-n { font-family: monospace; font-size: 10px; color: var(--muted); }
+.check-item .lbl-mora { font-family: monospace; font-size: 10px; color: var(--red); font-weight: 700; }
+
+.clear-btn { width: 100%; background: rgba(239,68,68,.1); border: 1px solid rgba(239,68,68,.2); color: #FCA5A5; font-size: 11px; cursor: pointer; padding: 6px; border-radius: 6px; text-align: center; margin-top: 6px; font-weight: 600; }
+.clear-btn:hover { background: rgba(239,68,68,.2); }
 
 .kpi-ctx { margin-bottom: 11px; padding-bottom: 10px; border-bottom: 1px solid var(--border); }
+.kpi-fecha { font-size: 11px; font-weight: 800; color: #38BDF8; background: rgba(56,189,248,0.12); border: 1px solid rgba(56,189,248,0.25); padding: 3px 8px; border-radius: 5px; margin-top: 3px; display: inline-block; }
 .kpi-lbl { font-size: 9px; text-transform: uppercase; letter-spacing: .1em; color: var(--muted); }
-.kpi-val { font-size: 14px; font-weight: 700; color: var(--gold); margin-top: 2px; }
+
 .kpi-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
 .kcard { background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.06); border-radius: 8px; padding: 9px 10px; }
 .kcard.full { grid-column: 1/-1; }
-.kcard .kk { font-size: 9px; text-transform: uppercase; color: var(--muted); margin-bottom: 4px; }
-.kcard .kv { font-family: monospace; font-size: 18px; font-weight: 700; color: #fff; }
-.kcard .kv.green { color: var(--green); }
+.kcard.split-card { grid-column: 1/-1; display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.kcard.warn { background: rgba(239,68,68,.08); border-color: rgba(239,68,68,.25); }
 
-.pop { padding: 14px 16px; min-width: 185px; max-width: 230px; }
-.pop-name { font-size: 13px; font-weight: 700; color: #fff; margin-bottom: 8px; }
-.pop-row { font-size: 11px; color: var(--sub); margin-bottom: 2px; display: flex; }
-.pop-k { color: var(--muted); font-size: 10px; width: 62px; flex-shrink: 0; }
-.pop-saldo { font-family: monospace; font-size: 15px; font-weight: 700; color: var(--green); margin-top: 6px; }
+.kcard .kk { font-size: 9px; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); margin-bottom: 4px; }
+.kcard .kv { font-family: monospace; font-size: 18px; font-weight: 700; color: #fff; line-height: 1; }
+.kcard .kv.green { color: var(--green); font-size: 15px; }
+.kcard .kv.blue  { color: var(--blue); font-size: 15px; }
+.kcard .kv.red   { color: var(--red); font-size: 15px; }
+.kcard .kv.sm    { font-size: 14px; }
+
+.kdiv { border: none; border-top: 1px solid var(--border); margin: 10px 0; }
+.ktop-lbl { font-size: 9px; text-transform: uppercase; letter-spacing: .1em; color: var(--muted); margin-bottom: 7px; }
+
+.top-row { display: flex; align-items: center; gap: 7px; margin-bottom: 6px; }
+.top-name { font-size: 10.5px; color: var(--sub); flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.bar-wrap { width: 60px; height: 5px; background: rgba(255,255,255,.07); border-radius: 3px; overflow: hidden; flex-shrink: 0; display: flex; }
+.bar-green { height: 100%; background: var(--green); }
+.bar-red   { height: 100%; background: var(--red); }
+.top-n { font-family: monospace; font-size: 9.5px; color: var(--sub); width: 50px; text-align: right; flex-shrink: 0; }
+
+@keyframes pulseMora {
+  0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.8); }
+  70% { box-shadow: 0 0 0 12px rgba(239, 68, 68, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+}
+.cluster-mora { animation: pulseMora 1.8s infinite; }
+
+/* POPUP ESTILIZADO */
+.pop { padding: 12px 14px; min-width: 220px; max-width: 260px; }
+.pop-header-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+.pop-id { font-family: monospace; font-size: 11px; font-weight: 800; color: var(--gold); background: var(--gold-dim); padding: 2px 7px; border-radius: 4px; border: 1px solid var(--gold-ring); }
+.pop-emp { font-size: 9px; text-transform: uppercase; letter-spacing: .1em; color: var(--sub); }
+.pop-name { font-size: 14px; font-weight: 800; color: #1E293B; margin-bottom: 10px; line-height: 1.35; word-break: break-word; }
+.pop-row { font-size: 11px; color: #64748B; margin-bottom: 4px; display: flex; align-items: center; justify-content: space-between; }
+.pop-k { color: #94A3B8; font-size: 10px; flex-shrink: 0; }
+.pop-v { font-weight: 700; color: #334155; text-align: right; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 150px; }
+
+.pop-saldo-block { margin-top: 10px; padding-top: 6px; border-top: 1px solid #E2E8F0; }
+.pop-saldo-lbl { font-size: 9.5px; font-weight: 700; text-transform: uppercase; color: #94A3B8; }
+.pop-saldo-green { font-family: monospace; font-size: 18px; font-weight: 800; color: #22C55E; text-align: left; margin-top: 1px; }
+.pop-saldo-red   { font-family: monospace; font-size: 18px; font-weight: 800; color: #EF4444; text-align: left; margin-top: 1px; }
+
+.pop-atraso-row { display: flex; justify-content: space-between; align-items: center; margin-top: 4px; background: rgba(239,68,68,0.1); padding: 4px 6px; border-radius: 5px; border: 1px solid rgba(239,68,68,0.2); }
+.pop-atraso-lbl { font-size: 10px; font-weight: 800; color: #DC2626; }
+.pop-atraso-val { font-family: monospace; font-size: 13px; font-weight: 800; color: #DC2626; }
+
+.pop-badge-mora { color: #DC2626; font-weight: 800; font-size: 11px; margin-top: 8px; background: #FEE2E2; padding: 6px 10px; border-radius: 6px; border: 1px solid #FCA5A5; text-align: center; }
+.pop-badge-ok   { color: #16A34A; font-weight: 700; font-size: 11px; margin-top: 8px; background: #DCFCE7; padding: 6px 10px; border-radius: 6px; border: 1px solid #86EFAC; text-align: center; }
 
 #tray { position: absolute; bottom: 12px; left: 12px; display: flex; gap: 7px; z-index: 400; }
 .tray-pill { background: rgba(11,21,37,.93); border: 1px solid var(--border); border-radius: 9px; padding: 7px 12px; font-size: 11.5px; color: var(--sub); cursor: pointer; }
@@ -150,24 +202,23 @@ html, body {
 <!-- TOPBAR -->
 <div id="topbar">
   <div class="tb-brand">
-    <div id="tb-title">🗺 Mapa de Clientes · Ejecutivo</div>
+    <div id="tb-title">MAPA DE CLIENTES - EJECUTIVO</div>
     <div id="tb-status"><span class="s-dot" id="s-dot" style="background:#4B5563"></span><span id="s-txt">Iniciando…</span></div>
   </div>
   <div class="tb-actions">
-    <!-- BOTÓN DINÁMICO DE GEOCODIFICACIÓN -->
     <button class="btn-geo hidden" id="btn-geocodificar" title="Existen registros sin geolocalizar">
       <span>📍</span> <span id="geo-count">Geocodificar (0)</span>
     </button>
 
     <div id="search-wrap">
       <span class="s-icon">🔍</span>
-      <input id="search" type="search" placeholder="Buscar cliente…" autocomplete="off"/>
+      <input id="search" type="search" placeholder="Buscar cliente..." autocomplete="off"/>
     </div>
     <button class="iBtn" id="btn-refresh" title="Actualizar datos">⟳</button>
   </div>
 </div>
 
-<!-- MODAL CONFIRMACIÓN GEOCODIFICACIÓN -->
+<!-- MODAL CONFIRMACIÓN -->
 <div class="modal-overlay" id="modal-geo">
   <div class="modal-card">
     <div class="modal-title">📍 Geocodificación de Direcciones</div>
@@ -184,7 +235,7 @@ html, body {
 <!-- PANEL CAPAS -->
 <div class="panel" id="p-layers">
   <div class="p-header" data-drag="p-layers">
-    <span class="p-title">🗂 Capas geográficas</span>
+    <span class="p-title">🗂 Capas dinámicas (Filtros)</span>
     <button class="xBtn" data-close="p-layers">✕</button>
   </div>
   <div class="p-body" id="layers-body"></div>
@@ -207,7 +258,43 @@ const REFRESH_MS    = 30_000;
 
 let CLIENTES = [];
 let PENDIENTES_COUNT = 0;
-let filtro = { empresa:null, region:null, territorio:null, agencia:null, asesor:null };
+let FECHA_REPORTE = "Sin Fecha";
+
+let filtrosSel = {
+  estatus: [],
+  empresa: [],
+  region: [],
+  territorio: [],
+  agencia: [],
+  asesor: []
+};
+
+let acordeonesState = {
+  estatus: true,
+  empresa: true,
+  region: false,
+  territorio: false,
+  agencia: false,
+  asesor: false
+};
+
+let allMarkers = [];
+
+const PALETA_EJECUTIVOS = [
+  '#2DD4BF', '#38BDF8', '#818CF8', '#C084FC', '#F472B6', 
+  '#FB7185', '#F97316', '#FBBF24', '#A3E635', '#34D399',
+  '#22D3EE', '#A78BFA', '#E879F9', '#F43F5E', '#10B981'
+];
+const colorEjecutivoMap = {};
+
+function getColorEjecutivo(asesor){
+  if(!asesor) return '#60A5FA';
+  if(!colorEjecutivoMap[asesor]){
+    const idx = Object.keys(colorEjecutivoMap).length % PALETA_EJECUTIVOS.length;
+    colorEjecutivoMap[asesor] = PALETA_EJECUTIVOS[idx];
+  }
+  return colorEjecutivoMap[asesor];
+}
 
 const STATUS_COLORS = { ok:'#22C55E', loading:'#C9A227', error:'#EF4444' };
 function setStatus(type, txt){
@@ -223,10 +310,26 @@ async function cargarDatos(){
     const r = await fetch(SHEET_API_URL, {cache:'no-store'});
     const j = await r.json();
     if(!j.ok) throw new Error(j.error||'Error');
-    CLIENTES = j.clientes.map(c=>({...c, id:Number(c.id)}));
+    
+    FECHA_REPORTE = j.fechaReporte || "Sin fecha";
+    
+    CLIENTES = j.clientes.map(c=>{
+      const valAtrasoNum = parseFloat(c.monto_atraso || c.atraso_monto || c.atraso);
+      const tieneAtraso  = (!isNaN(valAtrasoNum) && valAtrasoNum > 0) || c.atraso === true || String(c.atraso).toUpperCase() === "TRUE";
+      const montoAtrasoFinal = tieneAtraso ? (!isNaN(valAtrasoNum) && valAtrasoNum > 0 ? valAtrasoNum : c.saldo) : 0;
+      const montoPagare = parseFloat(c.pagare || c.monto_pagare) || 0;
+
+      return {
+        ...c, 
+        id: Number(c.id),
+        nombreCliente: c.cliente || c.nombre || c.nombre_cliente || c.razon_social || "CLIENTE S/N",
+        atraso: tieneAtraso,
+        montoAtraso: montoAtrasoFinal,
+        pagare: montoPagare
+      };
+    });
     PENDIENTES_COUNT = j.pendientes || 0;
     
-    // Control visual del botón dinámico de geocodificación
     const btnGeo = document.getElementById('btn-geocodificar');
     if (PENDIENTES_COUNT > 0) {
       document.getElementById('geo-count').textContent = `Geocodificar (${PENDIENTES_COUNT})`;
@@ -243,7 +346,6 @@ async function cargarDatos(){
   }
 }
 
-// PROCESAR GEOCODIFICACIÓN DESDE EL FRONTEND
 async function ejecutarGeocodificacionAPI() {
   const modalTxt = document.getElementById('modal-geo-txt');
   modalTxt.textContent = "Procesando coordenadas en Google Sheets... Por favor espera.";
@@ -265,7 +367,7 @@ async function ejecutarGeocodificacionAPI() {
       alert(`⚠ Atención: ${j.error}`);
     }
   } catch(e) {
-    alert("El proceso se ha puesto en marcha. Si la cuota diaria fue rebasada, el proceso nocturno automático completará las direcciones restantes a la 1:00 AM.");
+    alert("El proceso se ha puesto en marcha. Si la cuota diaria fue rebasada, el proceso nocturno automático completará las direcciones restantes.");
   }
   
   document.getElementById('modal-geo').classList.remove('open');
@@ -274,67 +376,382 @@ async function ejecutarGeocodificacionAPI() {
   render(false);
 }
 
-// MAPA Y RENDERIZADO
-const map = L.map('map',{zoomControl:true}).setView([19.43,-99.14],10);
+// MAPA Y LEAFLET
+const map = L.map('map',{zoomControl:true, preferCanvas:true}).setView([19.43,-99.14],10);
 L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',{maxZoom:20}).addTo(map);
 
-const cluster = L.markerClusterGroup();
+const cluster = L.markerClusterGroup({
+  chunkedLoading:true,
+  maxClusterRadius:45,
+  spiderfyOnMaxZoom:true,
+  showCoverageOnHover:false,
+  iconCreateFunction(c){
+    const markers = c.getAllChildMarkers();
+    const total = markers.length;
+    const morosos = markers.filter(m => m.clienteData && m.clienteData.atraso === true).length;
+    const tieneMora = morosos > 0;
+
+    const sz = total > 100 ? 46 : total > 30 ? 40 : 36;
+    const bg = tieneMora ? 'rgba(239, 68, 68, 0.92)' : 'rgba(201, 162, 39, 0.85)';
+    const border = tieneMora ? '#7F1D1D' : 'rgba(255, 255, 255, 0.2)';
+    const classAnim = tieneMora ? 'cluster-mora' : '';
+
+    return L.divIcon({
+      html:`<div class="${classAnim}" style="
+        width:${sz}px; height:${sz}px; border-radius:50%;
+        background:${bg}; border:2px solid ${border};
+        display:flex; flex-direction:column; align-items:center; justify-content:center;
+        font-weight:800; color:#fff; box-shadow:0 4px 12px rgba(0,0,0,.6);
+      ">
+        <span style="font-size:${total>99?10:12}px; line-height:1;">${total}</span>
+        ${tieneMora ? `<span style="font-size:8px; opacity:0.95; margin-top:1px;">🔴 ${morosos}</span>` : ''}
+      </div>`,
+      className: '',
+      iconSize: [sz, sz],
+    });
+  }
+});
 map.addLayer(cluster);
 
 const fmt = n=>'$'+Number(n).toLocaleString('es-MX',{maximumFractionDigits:0});
 
+function popHTML(c){
+  const colEjec = getColorEjecutivo(c.asesor);
+  const esMora = c.atraso === true;
+
+  return`<div class="pop">
+    <div class="pop-header-row">
+      <span class="pop-emp">${c.empresa||'MCM'}</span>
+      <span class="pop-id">ID: #${c.id}</span>
+    </div>
+    
+    <div class="pop-name">${c.nombreCliente}</div>
+    
+    <div class="pop-row">
+      <span class="pop-k">Agencia:</span>
+      <span class="pop-v">${c.agencia||'—'}</span>
+    </div>
+    <div class="pop-row">
+      <span class="pop-k">Asesor / Exec:</span>
+      <span class="pop-v" style="color:${colEjec}">${c.asesor||'—'}</span>
+    </div>
+    
+    <div class="pop-saldo-block">
+      <div class="pop-saldo-lbl">Saldo Total:</div>
+      <div class="${esMora ? 'pop-saldo-red' : 'pop-saldo-green'}">${fmt(c.saldo)}</div>
+
+      ${esMora ? `
+        <div class="pop-atraso-row">
+          <span class="pop-atraso-lbl">VALOR ATRASO:</span>
+          <span class="pop-atraso-val">${fmt(c.montoAtraso)}</span>
+        </div>
+        <div class="pop-badge-mora">🔴 EN MORA / ATRASO</div>
+      ` : `
+        <div class="pop-badge-ok">🟢 AL DÍA</div>
+      `}
+    </div>
+  </div>`;
+}
+
 function reconstruirMarcadores(){
   cluster.clearLayers();
-  const markers = CLIENTES.map(c=>{
+  allMarkers = CLIENTES.map(c=>{
+    const esMora = c.atraso === true;
+    const colorFinal = esMora ? '#EF4444' : getColorEjecutivo(c.asesor);
+    const colorBorde = esMora ? '#7F1D1D' : '#070E1A';
+
     const m = L.circleMarker([c.lat,c.lng],{
-      radius:7, color:'#070E1A', weight:1.5,
-      fillColor:c.atraso?'#EF4444':'#2DD4BF', fillOpacity:.92,
+      radius: esMora ? 8.5 : 7,
+      color: colorBorde,
+      weight: esMora ? 2.5 : 1.5,
+      fillColor: colorFinal,
+      fillOpacity: 0.95,
+      zIndexOffset: esMora ? 1000 : 0
     });
-    m.bindPopup(`<div class="pop">
-      <div class="pop-name">${c.nombre}</div>
-      <div class="pop-row"><span class="pop-k">Ejecutivo</span>${c.asesor}</div>
-      <div class="pop-row"><span class="pop-k">Agencia</span>${c.agencia}</div>
-      <div class="pop-saldo">${fmt(c.saldo)}</div>
-    </div>`);
+    m.bindPopup(popHTML(c),{maxWidth:260});
     m.clienteData = c;
     return m;
   });
-  cluster.addLayers(markers);
 }
 
-function filtrados(){
-  const q = document.getElementById('search').value.toLowerCase().trim();
-  return CLIENTES.filter(c=>
-    (!filtro.empresa || c.empresa === filtro.empresa) &&
-    (!q || c.nombre.toLowerCase().includes(q) || (c.asesor||'').toLowerCase().includes(q))
-  );
+function filtrados(q=''){
+  const ql = q.toLowerCase().trim();
+  return CLIENTES.filter(c => {
+    if (filtrosSel.estatus.length) {
+      if (filtrosSel.estatus.includes('mora') && !c.atraso) return false;
+      if (filtrosSel.estatus.includes('aldia') && c.atraso) return false;
+    }
+    if (filtrosSel.empresa.length && !filtrosSel.empresa.includes(c.empresa)) return false;
+    if (filtrosSel.region.length && !filtrosSel.region.includes(c.region)) return false;
+    if (filtrosSel.territorio.length && !filtrosSel.territorio.includes(c.territorio)) return false;
+    if (filtrosSel.agencia.length && !filtrosSel.agencia.includes(c.agencia)) return false;
+    if (filtrosSel.asesor.length && !filtrosSel.asesor.includes(c.asesor)) return false;
+    if (ql && !c.nombreCliente.toLowerCase().includes(ql) && !(c.asesor||'').toLowerCase().includes(ql) && !String(c.id).includes(ql)) return false;
+    return true;
+  });
 }
 
-function renderKPIs(){
-  const d = filtrados();
-  const cartera = d.reduce((s,c)=>s+c.saldo,0);
-  document.getElementById('kpis-body').innerHTML = `
-    <div class="kpi-ctx"><div class="kpi-lbl">Vista general</div><div class="kpi-val">${d.length} Clientes</div></div>
-    <div class="kpi-grid">
-      <div class="kcard full"><div class="kk">Cartera Total</div><div class="kv green">${fmt(cartera)}</div></div>
-    </div>
-  `;
+function actualizarMapa(ajustar=false){
+  const q = document.getElementById('search').value;
+  const vis = filtrados(q);
+  const ids = new Set(vis.map(c=>c.id));
+  cluster.clearLayers();
+  const mk = allMarkers.filter(m=>ids.has(m.clienteData.id));
+  cluster.addLayers(mk);
+  if(ajustar && mk.length){
+    const g = L.featureGroup(mk);
+    map.fitBounds(g.getBounds().pad(.2),{maxZoom:15,animate:true});
+  }
+}
+
+function unicos(campo){
+  const s = new Set();
+  CLIENTES.forEach(c => {
+    if (filtrosSel.estatus.length) {
+      if (filtrosSel.estatus.includes('mora') && !c.atraso) return;
+      if (filtrosSel.estatus.includes('aldia') && c.atraso) return;
+    }
+    if (campo !== 'empresa' && filtrosSel.empresa.length && !filtrosSel.empresa.includes(c.empresa)) return;
+    if (campo !== 'region' && filtrosSel.region.length && !filtrosSel.region.includes(c.region)) return;
+    if (campo !== 'territorio' && filtrosSel.territorio.length && !filtrosSel.territorio.includes(c.territorio)) return;
+    if (campo !== 'agencia' && filtrosSel.agencia.length && !filtrosSel.agencia.includes(c.agencia)) return;
+    if (c[campo]) s.add(c[campo]);
+  });
+  return [...s].sort((a,b)=>a.toString().localeCompare(b.toString(),'es'));
+}
+
+function cuentaConMora(campo, valor){
+  let total = 0;
+  let morosos = 0;
+  CLIENTES.forEach(c => {
+    if (filtrosSel.estatus.length) {
+      if (filtrosSel.estatus.includes('mora') && !c.atraso) return;
+      if (filtrosSel.estatus.includes('aldia') && c.atraso) return;
+    }
+    if (campo !== 'empresa' && filtrosSel.empresa.length && !filtrosSel.empresa.includes(c.empresa)) return;
+    if (campo !== 'region' && filtrosSel.region.length && !filtrosSel.region.includes(c.region)) return;
+    if (campo !== 'territorio' && filtrosSel.territorio.length && !filtrosSel.territorio.includes(c.territorio)) return;
+    if (campo !== 'agencia' && filtrosSel.agencia.length && !filtrosSel.agencia.includes(c.agencia)) return;
+    
+    if (c[campo] === valor) {
+      total++;
+      if (c.atraso === true) morosos++;
+    }
+  });
+  return { total, morosos };
 }
 
 function renderFiltros(){
-  document.getElementById('layers-body').innerHTML = `<div class="layer-blk"><div class="layer-lbl">Compañías</div></div>`;
+  const cont = document.getElementById('layers-body');
+  cont.innerHTML = '';
+
+  let haySeleccion = Object.values(filtrosSel).some(arr => arr.length > 0);
+
+  const grpEst = document.createElement('div');
+  grpEst.className = 'layer-group';
+  grpEst.innerHTML = `
+    <div class="layer-hdr" onclick="acordeonesState.estatus = !acordeonesState.estatus; renderFiltros();">
+      <span>🚨 Estatus de Cartera ${filtrosSel.estatus.length ? `<b style="color:var(--gold);">(${filtrosSel.estatus.length})</b>`:''}</span>
+      <span>${acordeonesState.estatus ? '▲' : '▼'}</span>
+    </div>
+    <div class="layer-cnt${acordeonesState.estatus ? '' : ' closed'}">
+      <label class="check-item">
+        <input type="checkbox" ${filtrosSel.estatus.includes('mora')?'checked':''} onchange="toggleEstatus('mora')"/>
+        <span class="lbl-txt" style="color:#FCA5A5;font-weight:700;">🔴 Solo Clientes en Mora</span>
+      </label>
+      <label class="check-item">
+        <input type="checkbox" ${filtrosSel.estatus.includes('aldia')?'checked':''} onchange="toggleEstatus('aldia')"/>
+        <span class="lbl-txt" style="color:#A7F3D0;">🟢 Solo Clientes Al Día</span>
+      </label>
+    </div>
+  `;
+  cont.appendChild(grpEst);
+
+  const CAPAS_CONFIG = [
+    { campo: 'empresa',    label: 'Compañía',   icon: '🏢' },
+    { campo: 'region',     label: 'Región',     icon: '🗺' },
+    { campo: 'territorio', label: 'Territorio', icon: '📍' },
+    { campo: 'agencia',    label: 'Agencia',    icon: '🏪' },
+    { campo: 'asesor',     label: 'Ejecutivo',  icon: '👤' }
+  ];
+
+  CAPAS_CONFIG.forEach(capa => {
+    const vals = unicos(capa.campo);
+    if (!vals.length) return;
+
+    const group = document.createElement('div');
+    group.className = 'layer-group';
+
+    const isOpen = acordeonesState[capa.campo];
+    const nSel = filtrosSel[capa.campo].length;
+
+    const hdr = document.createElement('div');
+    hdr.className = 'layer-hdr';
+    hdr.innerHTML = `
+      <span>${capa.icon} ${capa.label} ${nSel > 0 ? `<b style="color:var(--gold);">(${nSel})</b>` : ''}</span>
+      <span>${isOpen ? '▲' : '▼'}</span>
+    `;
+    hdr.onclick = () => {
+      acordeonesState[capa.campo] = !acordeonesState[capa.campo];
+      renderFiltros();
+    };
+
+    const cnt = document.createElement('div');
+    cnt.className = 'layer-cnt' + (isOpen ? '' : ' closed');
+
+    vals.forEach(v => {
+      const isChecked = filtrosSel[capa.campo].includes(v);
+      const { total, morosos } = cuentaConMora(capa.campo, v);
+      const colorTag = (capa.campo === 'asesor') ? getColorEjecutivo(v) : null;
+
+      const lbl = document.createElement('label');
+      lbl.className = 'check-item';
+      lbl.innerHTML = `
+        <input type="checkbox" ${isChecked ? 'checked' : ''}/>
+        ${colorTag ? `<span class="legend-dot" style="background:${colorTag}"></span>` : ''}
+        <span class="lbl-txt" title="${v}">${v}</span>
+        <span class="lbl-n">${total}</span>
+        ${morosos > 0 ? `<span class="lbl-mora">(🔴${morosos})</span>` : ''}
+      `;
+
+      const chk = lbl.querySelector('input');
+      chk.onchange = (e) => {
+        if (e.target.checked) {
+          filtrosSel[capa.campo].push(v);
+        } else {
+          filtrosSel[capa.campo] = filtrosSel[capa.campo].filter(x => x !== v);
+        }
+        render(true);
+      };
+
+      cnt.appendChild(lbl);
+    });
+
+    group.appendChild(hdr);
+    group.appendChild(cnt);
+    cont.appendChild(group);
+  });
+
+  if (haySeleccion) {
+    const cb = document.createElement('button');
+    cb.className = 'clear-btn';
+    cb.innerHTML = '✕ Limpiar todos los filtros';
+    cb.onclick = () => {
+      filtrosSel = { estatus: [], empresa: [], region: [], territorio: [], agencia: [], asesor: [] };
+      render(true);
+    };
+    cont.appendChild(cb);
+  }
 }
 
-function render(){
+function toggleEstatus(val) {
+  if (filtrosSel.estatus.includes(val)) {
+    filtrosSel.estatus = filtrosSel.estatus.filter(x => x !== val);
+  } else {
+    filtrosSel.estatus.push(val);
+  }
+  render(true);
+}
+
+// RENDERIZADO DE KPIS INCLUYENDO CARTERA Y PAGARÉ DINÁMICOS
+function renderKPIs(){
+  const q = document.getElementById('search').value;
+  const datos = filtrados(q);
+  
+  const carteraTotal = datos.reduce((s,c) => s + (c.saldo || 0), 0);
+  const pagareTotal  = datos.reduce((s,c) => s + (c.pagare || 0), 0);
+  const atrasoTotal  = datos.reduce((s,c) => s + (c.montoAtraso || 0), 0);
+  
+  const prom = datos.length ? Math.round(carteraTotal / datos.length) : 0;
+  const numMorosos = datos.filter(c => c.atraso).length;
+  
+  const pctClientesMora = datos.length ? (numMorosos / datos.length * 100).toFixed(1) : '0.0';
+  const pctMoraFinanciera = carteraTotal > 0 ? (atrasoTotal / carteraTotal * 100).toFixed(1) : '0.0';
+
+  const porEj = {};
+  datos.forEach(c => {
+    if (c.asesor) {
+      if (!porEj[c.asesor]) porEj[c.asesor] = { total: 0, alDia: 0, morosos: 0 };
+      porEj[c.asesor].total++;
+      if (c.atraso === true) porEj[c.asesor].morosos++;
+      else porEj[c.asesor].alDia++;
+    }
+  });
+
+  const top = Object.entries(porEj).sort((a,b)=>b[1].total - a[1].total).slice(0,5);
+  const maxTotal = top.length ? top[0][1].total : 1;
+
+  document.getElementById('kpis-body').innerHTML = `
+    <div class="kpi-ctx">
+      <div class="kpi-lbl">Corte de Saldos (Celda X1)</div>
+      <div class="kpi-fecha">📅 ${FECHA_REPORTE}</div>
+    </div>
+    
+    <div class="kpi-grid">
+      <div class="kcard"><div class="kk">Clientes</div><div class="kv">${datos.length}</div></div>
+      <div class="kcard"><div class="kk">Ejecutivos</div><div class="kv">${Object.keys(porEj).length}</div></div>
+      
+      <!-- TARJETA DOBLE: CARTERA TOTAL + SUMATORIA PAGARÉ (COLUMNA M) -->
+      <div class="kcard split-card">
+        <div>
+          <div class="kk">💰 Cartera Total</div>
+          <div class="kv green">${fmt(carteraTotal)}</div>
+        </div>
+        <div style="border-left: 1px solid var(--border); padding-left: 8px;">
+          <div class="kk">📜 Total Pagaré</div>
+          <div class="kv blue">${fmt(pagareTotal)}</div>
+        </div>
+      </div>
+
+      <div class="kcard full warn"><div class="kk">🚨 Saldo Total Atraso</div><div class="kv red">${fmt(atrasoTotal)}</div></div>
+      
+      <div class="kcard"><div class="kk">Saldo Promedio</div><div class="kv sm">${fmt(prom)}</div></div>
+      <div class="kcard warn"><div class="kk">% Mora Fin. (S.Atraso/Saldo)</div><div class="kv red sm">${pctMoraFinanciera}%</div></div>
+
+      <div class="kcard full${parseFloat(pctClientesMora)>0 ? ' warn':''}">
+        <div class="kk">Clientes en Mora / Atraso</div>
+        <div class="kv${parseFloat(pctClientesMora)>0 ? ' red':''} sm">${numMorosos} <span style="font-size:10px;color:#94A3B8;">(${pctClientesMora}% vol)</span></div>
+      </div>
+    </div>
+    
+    <hr class="kdiv"/>
+    <div class="ktop-lbl">Top ejecutivos en vista</div>
+    ${top.map(([nombre, st]) => {
+      const col = getColorEjecutivo(nombre);
+      const pctWidth = (st.total / maxTotal) * 100;
+      const pctGreen = (st.alDia / st.total) * 100;
+      const pctRed   = (st.morosos / st.total) * 100;
+
+      return `
+      <div class="top-row">
+        <span class="legend-dot" style="background:${col}"></span>
+        <span class="top-name">${nombre}</span>
+        <div class="bar-wrap" style="width:${pctWidth * 0.6}px;">
+          <div class="bar-green" style="width:${pctGreen}%;"></div>
+          <div class="bar-red" style="width:${pctRed}%;"></div>
+        </div>
+        <span class="top-n">${st.total} <span style="color:#94A3B8;font-size:8.5px;">(${st.alDia}/${st.morosos})</span></span>
+      </div>`;
+    }).join('')}
+  `;
+}
+
+function render(ajustar=false){
   renderFiltros();
   renderKPIs();
+  actualizarMapa(ajustar);
 }
+
+// BUSCADOR CON DEBOUNCE
+let st;
+document.getElementById('search').addEventListener('input',()=>{
+  clearTimeout(st); st = setTimeout(()=>render(false),220);
+});
 
 // EVENTOS DE MODAL Y BOTONES
 document.getElementById('btn-geocodificar').addEventListener('click', ()=>{
   document.getElementById('modal-geo-txt').textContent = 
     `Se han detectado ${PENDIENTES_COUNT} registros con dirección que aún no tienen coordenadas. ¿Deseas correr el proceso de geolocalización ahora?`;
-  document.getElementById('modal-geo').classList.open = true;
   document.getElementById('modal-geo').classList.add('open');
 });
 
@@ -347,19 +764,22 @@ document.getElementById('btn-modal-confirm').addEventListener('click', ()=>{
 });
 
 document.getElementById('btn-refresh').addEventListener('click', async ()=>{
+  const btn = document.getElementById('btn-refresh');
+  btn.classList.add('spinning');
   await cargarDatos();
   reconstruirMarcadores();
-  render();
+  render(false);
+  setTimeout(()=>btn.classList.remove('spinning'),600);
 });
 
 (async function init(){
   await cargarDatos();
   reconstruirMarcadores();
-  render();
+  render(true);
   setInterval(async()=>{
     await cargarDatos();
     reconstruirMarcadores();
-    render();
+    render(false);
   }, REFRESH_MS);
 })();
 </script>
