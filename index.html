@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
-<title>Mapa de Clientes · Cartera y Pagaré Dinámicos</title>
+<title>Mapa de Clientes · Ejecutivo</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"/>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.5.3/MarkerCluster.css"/>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.5.3/MarkerCluster.Default.css"/>
@@ -40,38 +40,38 @@ html, body {
 #map { position: absolute; inset: 0; z-index: 1; }
 
 #topbar {
-  position: absolute; top: 0; left: 0; right: 0; height: 56px;
-  display: flex; align-items: center; justify-content: space-between; padding: 0 14px;
+  position: absolute; top: 0; left: 0; right: 0; height: 54px;
+  display: flex; align-items: center; justify-content: space-between; padding: 0 12px;
   background: linear-gradient(180deg, rgba(7,14,26,.97) 60%, rgba(7,14,26,0));
-  z-index: 500; gap: 10px;
+  z-index: 500; gap: 8px;
 }
 .tb-brand { display: flex; flex-direction: column; min-width: 0; flex-shrink: 1; }
-#tb-title { font-size: 13.5px; font-weight: 700; color: #F1F5F9; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-#tb-status { font-size: 10px; color: var(--sub); display: flex; align-items: center; gap: 5px; margin-top: 2px; }
+#tb-title { font-size: 13px; font-weight: 700; color: #F1F5F9; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+#tb-status { font-size: 9.5px; color: var(--sub); display: flex; align-items: center; gap: 5px; margin-top: 2px; }
 .s-dot { width: 5px; height: 5px; border-radius: 50%; flex-shrink: 0; transition: background .3s; }
 
-.tb-actions { display: flex; align-items: center; gap: 7px; flex-shrink: 0; }
+.tb-actions { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
 #search-wrap { position: relative; display: flex; align-items: center; }
 #search {
   background: rgba(255,255,255,.06); border: 1px solid var(--border); border-radius: 8px;
-  color: var(--text); font-size: 12px; padding: 6px 10px 6px 28px; outline: none; width: 150px; transition: width .2s, border-color .2s;
+  color: var(--text); font-size: 11.5px; padding: 6px 8px 6px 26px; outline: none; width: 130px; transition: width .2s;
 }
-#search:focus { border-color: var(--gold-ring); width: 190px; }
+#search:focus { border-color: var(--gold-ring); width: 160px; }
 #search::placeholder { color: var(--muted); }
-.s-icon { position: absolute; left: 8px; color: var(--muted); font-size: 12px; pointer-events: none; }
+.s-icon { position: absolute; left: 7px; color: var(--muted); font-size: 11px; pointer-events: none; }
 
 .btn-geo {
   background: var(--gold-dim); border: 1px solid var(--gold-ring); color: var(--gold);
-  font-size: 11px; font-weight: 600; padding: 6px 10px; border-radius: 8px; cursor: pointer;
-  display: flex; align-items: center; gap: 5px; transition: .15s; white-space: nowrap;
+  font-size: 10.5px; font-weight: 600; padding: 5px 8px; border-radius: 8px; cursor: pointer;
+  display: flex; align-items: center; gap: 4px; transition: .15s; white-space: nowrap;
 }
-.btn-geo:hover { background: rgba(201,162,39,.25); border-color: var(--gold); }
+.btn-geo:hover { background: rgba(201,162,39,.25); }
 .btn-geo.hidden { display: none !important; }
 
 .iBtn {
-  width: 32px; height: 32px; background: rgba(255,255,255,.05); border: 1px solid var(--border);
+  width: 30px; height: 30px; background: rgba(255,255,255,.05); border: 1px solid var(--border);
   border-radius: 8px; color: var(--sub); cursor: pointer; display: flex; align-items: center; justify-content: center;
-  font-size: 14px; transition: .15s; flex-shrink: 0;
+  font-size: 13px; transition: .15s; flex-shrink: 0;
 }
 .iBtn:hover { background: rgba(255,255,255,.1); color: var(--text); }
 @keyframes spin { to { transform: rotate(360deg); } }
@@ -88,29 +88,27 @@ html, body {
   background: var(--panel); border: 1px solid var(--border); border-radius: 14px;
   box-shadow: var(--shadow); width: 100%; max-width: 340px; padding: 18px; text-align: center;
 }
-.modal-title { font-size: 15px; font-weight: 700; color: #fff; margin-bottom: 8px; }
-.modal-desc { font-size: 12px; color: var(--sub); line-height: 1.4; margin-bottom: 18px; }
+.modal-title { font-size: 14.5px; font-weight: 700; color: #fff; margin-bottom: 8px; }
+.modal-desc { font-size: 12px; color: var(--sub); line-height: 1.4; margin-bottom: 16px; }
 .modal-actions { display: flex; gap: 8px; }
 .mBtn { flex: 1; padding: 9px 0; border-radius: 8px; font-size: 12px; font-weight: 600; cursor: pointer; border: none; transition: .15s; }
 .mBtn-cancel { background: rgba(255,255,255,.06); color: var(--sub); border: 1px solid var(--border); }
-.mBtn-cancel:hover { background: rgba(255,255,255,.1); color: #fff; }
 .mBtn-confirm { background: var(--gold); color: #000; }
-.mBtn-confirm:hover { background: #E5B82E; }
 
-/* PANELS & STYLES */
+/* PANELES DE ESCRITORIO Y BASE */
 .panel {
   position: absolute; background: rgba(11,21,37,.96); backdrop-filter: blur(14px);
   border: 1px solid var(--border); border-radius: var(--r); box-shadow: var(--shadow);
   z-index: 400; display: flex; flex-direction: column; overflow: hidden; transition: opacity .2s, transform .2s;
 }
-.panel.hidden { display: none; }
-#p-layers { top: 64px; left: 12px; width: 270px; max-height: calc(100dvh - 80px); }
-#p-kpis   { top: 64px; right: 12px; width: 310px; max-height: calc(100dvh - 80px); }
+.panel.hidden { display: none !important; }
+#p-layers { top: 62px; left: 12px; width: 270px; max-height: calc(100dvh - 78px); }
+#p-kpis   { top: 62px; right: 12px; width: 310px; max-height: calc(100dvh - 78px); }
 .p-header { display: flex; align-items: center; justify-content: space-between; padding: 10px 12px; border-bottom: 1px solid var(--border); cursor: grab; user-select: none; flex-shrink: 0; }
 .p-title { font-size: 11.5px; font-weight: 600; display: flex; align-items: center; gap: 6px; letter-spacing: .02em; }
-.xBtn { width: 22px; height: 22px; border-radius: 6px; border: none; background: transparent; color: var(--muted); cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 12px; }
-.xBtn:hover { background: rgba(239,68,68,.18); color: #FCA5A5; }
-.p-body { overflow-y: auto; padding: 11px; flex: 1; }
+.xBtn { width: 24px; height: 24px; border-radius: 6px; border: none; background: rgba(255,255,255,.05); color: var(--sub); cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 12px; }
+.xBtn:hover { background: rgba(239,68,68,.2); color: #FCA5A5; }
+.p-body { overflow-y: auto; padding: 10px; flex: 1; }
 
 .layer-group { margin-bottom: 8px; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; background: rgba(255,255,255,.02); }
 .layer-hdr {
@@ -118,81 +116,99 @@ html, body {
   background: rgba(255,255,255,.04); cursor: pointer; font-size: 11px; font-weight: 700;
   color: var(--text); user-select: none;
 }
-.layer-hdr:hover { background: rgba(255,255,255,.07); }
 .layer-cnt { padding: 6px 8px; display: flex; flex-direction: column; gap: 4px; max-height: 180px; overflow-y: auto; }
 .layer-cnt.closed { display: none; }
 
 .check-item {
   display: flex; align-items: center; gap: 7px; font-size: 11.5px; color: var(--sub);
-  cursor: pointer; padding: 3px 4px; border-radius: 5px; transition: .12s;
+  cursor: pointer; padding: 3px 4px; border-radius: 5px;
 }
-.check-item:hover { background: rgba(255,255,255,.05); color: var(--text); }
 .check-item input[type="checkbox"] { accent-color: var(--gold); cursor: pointer; width: 14px; height: 14px; }
 .check-item .lbl-txt { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .check-item .lbl-n { font-family: monospace; font-size: 10px; color: var(--muted); }
 .check-item .lbl-mora { font-family: monospace; font-size: 10px; color: var(--red); font-weight: 700; }
 
 .clear-btn { width: 100%; background: rgba(239,68,68,.1); border: 1px solid rgba(239,68,68,.2); color: #FCA5A5; font-size: 11px; cursor: pointer; padding: 6px; border-radius: 6px; text-align: center; margin-top: 6px; font-weight: 600; }
-.clear-btn:hover { background: rgba(239,68,68,.2); }
 
-.kpi-ctx { margin-bottom: 11px; padding-bottom: 10px; border-bottom: 1px solid var(--border); }
-.kpi-fecha { font-size: 11px; font-weight: 800; color: #38BDF8; background: rgba(56,189,248,0.12); border: 1px solid rgba(56,189,248,0.25); padding: 3px 8px; border-radius: 5px; margin-top: 3px; display: inline-block; }
-.kpi-lbl { font-size: 9px; text-transform: uppercase; letter-spacing: .1em; color: var(--muted); }
+.kpi-ctx { margin-bottom: 9px; padding-bottom: 8px; border-bottom: 1px solid var(--border); }
+.kpi-fecha { font-size: 10.5px; font-weight: 700; color: #38BDF8; background: rgba(56,189,248,0.12); border: 1px solid rgba(56,189,248,0.25); padding: 3px 6px; border-radius: 5px; margin-top: 3px; display: inline-block; }
+.kpi-lbl { font-size: 9px; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); }
 
 .kpi-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
-.kcard { background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.06); border-radius: 8px; padding: 9px 10px; }
+.kcard { background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.06); border-radius: 8px; padding: 8px 9px; }
 .kcard.full { grid-column: 1/-1; }
 .kcard.split-card { grid-column: 1/-1; display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
 .kcard.warn { background: rgba(239,68,68,.08); border-color: rgba(239,68,68,.25); }
 
-.kcard .kk { font-size: 9px; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); margin-bottom: 4px; }
-.kcard .kv { font-family: monospace; font-size: 18px; font-weight: 700; color: #fff; line-height: 1; }
-.kcard .kv.green { color: var(--green); font-size: 15px; }
-.kcard .kv.blue  { color: var(--blue); font-size: 15px; }
-.kcard .kv.red   { color: var(--red); font-size: 15px; }
-.kcard .kv.sm    { font-size: 14px; }
+.kcard .kk { font-size: 8.5px; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); margin-bottom: 3px; }
+.kcard .kv { font-family: monospace; font-size: 17px; font-weight: 700; color: #fff; line-height: 1.1; }
+.kcard .kv.green { color: var(--green); font-size: 14.5px; }
+.kcard .kv.blue  { color: var(--blue); font-size: 14.5px; }
+.kcard .kv.red   { color: var(--red); font-size: 14.5px; }
+.kcard .kv.sm    { font-size: 13.5px; }
 
-.kdiv { border: none; border-top: 1px solid var(--border); margin: 10px 0; }
-.ktop-lbl { font-size: 9px; text-transform: uppercase; letter-spacing: .1em; color: var(--muted); margin-bottom: 7px; }
+.kdiv { border: none; border-top: 1px solid var(--border); margin: 8px 0; }
+.ktop-lbl { font-size: 9px; text-transform: uppercase; letter-spacing: .1em; color: var(--muted); margin-bottom: 6px; }
 
-.top-row { display: flex; align-items: center; gap: 7px; margin-bottom: 6px; }
-.top-name { font-size: 10.5px; color: var(--sub); flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.bar-wrap { width: 60px; height: 5px; background: rgba(255,255,255,.07); border-radius: 3px; overflow: hidden; flex-shrink: 0; display: flex; }
+.top-row { display: flex; align-items: center; gap: 6px; margin-bottom: 5px; }
+.top-name { font-size: 10px; color: var(--sub); flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.bar-wrap { width: 50px; height: 5px; background: rgba(255,255,255,.07); border-radius: 3px; overflow: hidden; flex-shrink: 0; display: flex; }
 .bar-green { height: 100%; background: var(--green); }
 .bar-red   { height: 100%; background: var(--red); }
-.top-n { font-family: monospace; font-size: 9.5px; color: var(--sub); width: 50px; text-align: right; flex-shrink: 0; }
-
-@keyframes pulseMora {
-  0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.8); }
-  70% { box-shadow: 0 0 0 12px rgba(239, 68, 68, 0); }
-  100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
-}
-.cluster-mora { animation: pulseMora 1.8s infinite; }
+.top-n { font-family: monospace; font-size: 9px; color: var(--sub); width: 44px; text-align: right; flex-shrink: 0; }
 
 /* POPUP ESTILIZADO */
-.pop { padding: 12px 14px; min-width: 220px; max-width: 260px; }
-.pop-header-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
-.pop-id { font-family: monospace; font-size: 11px; font-weight: 800; color: var(--gold); background: var(--gold-dim); padding: 2px 7px; border-radius: 4px; border: 1px solid var(--gold-ring); }
-.pop-emp { font-size: 9px; text-transform: uppercase; letter-spacing: .1em; color: var(--sub); }
-.pop-name { font-size: 14px; font-weight: 800; color: #1E293B; margin-bottom: 10px; line-height: 1.35; word-break: break-word; }
-.pop-row { font-size: 11px; color: #64748B; margin-bottom: 4px; display: flex; align-items: center; justify-content: space-between; }
-.pop-k { color: #94A3B8; font-size: 10px; flex-shrink: 0; }
-.pop-v { font-weight: 700; color: #334155; text-align: right; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 150px; }
+.pop { padding: 12px 14px; min-width: 210px; max-width: 250px; }
+.pop-header-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; }
+.pop-id { font-family: monospace; font-size: 10.5px; font-weight: 800; color: var(--gold); background: var(--gold-dim); padding: 2px 6px; border-radius: 4px; }
+.pop-emp { font-size: 9px; text-transform: uppercase; color: var(--sub); }
+.pop-name { font-size: 13.5px; font-weight: 800; color: #1E293B; margin-bottom: 8px; line-height: 1.3; }
+.pop-row { font-size: 11px; color: #64748B; margin-bottom: 3px; display: flex; justify-content: space-between; }
+.pop-k { color: #94A3B8; font-size: 10px; }
+.pop-v { font-weight: 700; color: #334155; text-align: right; max-width: 140px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pop-saldo-block { margin-top: 8px; padding-top: 6px; border-top: 1px solid #E2E8F0; }
+.pop-saldo-lbl { font-size: 9px; font-weight: 700; color: #94A3B8; text-transform: uppercase; }
+.pop-saldo-green { font-family: monospace; font-size: 17px; font-weight: 800; color: #22C55E; margin-top: 1px; }
+.pop-saldo-red   { font-family: monospace; font-size: 17px; font-weight: 800; color: #EF4444; margin-top: 1px; }
+.pop-atraso-row { display: flex; justify-content: space-between; align-items: center; margin-top: 4px; background: rgba(239,68,68,0.1); padding: 4px 6px; border-radius: 4px; }
+.pop-atraso-lbl { font-size: 9.5px; font-weight: 800; color: #DC2626; }
+.pop-atraso-val { font-family: monospace; font-size: 12.5px; font-weight: 800; color: #DC2626; }
+.pop-badge-mora { color: #DC2626; font-weight: 800; font-size: 10.5px; margin-top: 6px; background: #FEE2E2; padding: 5px; border-radius: 5px; text-align: center; }
+.pop-badge-ok   { color: #16A34A; font-weight: 700; font-size: 10.5px; margin-top: 6px; background: #DCFCE7; padding: 5px; border-radius: 5px; text-align: center; }
 
-.pop-saldo-block { margin-top: 10px; padding-top: 6px; border-top: 1px solid #E2E8F0; }
-.pop-saldo-lbl { font-size: 9.5px; font-weight: 700; text-transform: uppercase; color: #94A3B8; }
-.pop-saldo-green { font-family: monospace; font-size: 18px; font-weight: 800; color: #22C55E; text-align: left; margin-top: 1px; }
-.pop-saldo-red   { font-family: monospace; font-size: 18px; font-weight: 800; color: #EF4444; text-align: left; margin-top: 1px; }
+/* BARRA FLOTANTE INFERIOR PARA MÓVIL */
+#mobile-dock {
+  display: none; position: absolute; bottom: 16px; left: 50%; transform: translateX(-50%);
+  z-index: 600; gap: 10px; background: rgba(11,21,37,.95); padding: 5px 8px;
+  border-radius: 30px; border: 1px solid var(--border); box-shadow: var(--shadow);
+  backdrop-filter: blur(10px);
+}
+.dock-btn {
+  background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.1);
+  color: var(--text); padding: 8px 16px; border-radius: 20px; font-size: 12px;
+  font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 6px;
+}
+.dock-btn.active {
+  background: var(--gold); color: #000; border-color: var(--gold);
+}
 
-.pop-atraso-row { display: flex; justify-content: space-between; align-items: center; margin-top: 4px; background: rgba(239,68,68,0.1); padding: 4px 6px; border-radius: 5px; border: 1px solid rgba(239,68,68,0.2); }
-.pop-atraso-lbl { font-size: 10px; font-weight: 800; color: #DC2626; }
-.pop-atraso-val { font-family: monospace; font-size: 13px; font-weight: 800; color: #DC2626; }
+/* RESPONSIVE MÓVIL (PANTALLAS <= 768px) */
+@media (max-width: 768px) {
+  #mobile-dock { display: flex; }
+  
+  /* En móvil los paneles son hojas modales deslizables */
+  .panel {
+    top: auto !important; left: 10px !important; right: 10px !important; bottom: 68px !important;
+    width: auto !important; max-height: 65dvh !important; border-radius: 16px !important;
+    box-shadow: 0 10px 40px rgba(0,0,0,.9) !important;
+  }
+  .panel.minimized-mobile { display: none !important; }
 
-.pop-badge-mora { color: #DC2626; font-weight: 800; font-size: 11px; margin-top: 8px; background: #FEE2E2; padding: 6px 10px; border-radius: 6px; border: 1px solid #FCA5A5; text-align: center; }
-.pop-badge-ok   { color: #16A34A; font-weight: 700; font-size: 11px; margin-top: 8px; background: #DCFCE7; padding: 6px 10px; border-radius: 6px; border: 1px solid #86EFAC; text-align: center; }
-
-#tray { position: absolute; bottom: 12px; left: 12px; display: flex; gap: 7px; z-index: 400; }
-.tray-pill { background: rgba(11,21,37,.93); border: 1px solid var(--border); border-radius: 9px; padding: 7px 12px; font-size: 11.5px; color: var(--sub); cursor: pointer; }
+  #search { width: 100px; }
+  #search:focus { width: 130px; }
+  #tb-title { font-size: 11px; }
+  #tb-status { font-size: 8.5px; }
+}
 </style>
 </head>
 <body>
@@ -202,20 +218,25 @@ html, body {
 <!-- TOPBAR -->
 <div id="topbar">
   <div class="tb-brand">
-    <div id="tb-title">MAPA DE CLIENTES - EJECUTIVO</div>
+    <div id="tb-title">MAPA DE CLIENTES · EJECUTIVO</div>
     <div id="tb-status"><span class="s-dot" id="s-dot" style="background:#4B5563"></span><span id="s-txt">Iniciando…</span></div>
   </div>
   <div class="tb-actions">
     <button class="btn-geo hidden" id="btn-geocodificar" title="Existen registros sin geolocalizar">
       <span>📍</span> <span id="geo-count">Geocodificar (0)</span>
     </button>
-
     <div id="search-wrap">
       <span class="s-icon">🔍</span>
-      <input id="search" type="search" placeholder="Buscar cliente..." autocomplete="off"/>
+      <input id="search" type="search" placeholder="Buscar..." autocomplete="off"/>
     </div>
     <button class="iBtn" id="btn-refresh" title="Actualizar datos">⟳</button>
   </div>
+</div>
+
+<!-- BARRA FLOTANTE DE CONTROL EN CELULAR -->
+<div id="mobile-dock">
+  <button class="dock-btn" id="dock-layers">🗂 Filtros</button>
+  <button class="dock-btn" id="dock-kpis">📊 KPIs</button>
 </div>
 
 <!-- MODAL CONFIRMACIÓN -->
@@ -234,23 +255,21 @@ html, body {
 
 <!-- PANEL CAPAS -->
 <div class="panel" id="p-layers">
-  <div class="p-header" data-drag="p-layers">
+  <div class="p-header">
     <span class="p-title">🗂 Capas dinámicas (Filtros)</span>
-    <button class="xBtn" data-close="p-layers">✕</button>
+    <button class="xBtn" id="close-layers">✕</button>
   </div>
   <div class="p-body" id="layers-body"></div>
 </div>
 
 <!-- PANEL KPIs -->
 <div class="panel" id="p-kpis">
-  <div class="p-header" data-drag="p-kpis">
+  <div class="p-header">
     <span class="p-title">📊 Totalizador ejecutivo</span>
-    <button class="xBtn" data-close="p-kpis">✕</button>
+    <button class="xBtn" id="close-kpis">✕</button>
   </div>
   <div class="p-body" id="kpis-body"></div>
 </div>
-
-<div id="tray"></div>
 
 <script>
 const SHEET_API_URL = "https://script.google.com/macros/s/AKfycbxSG4sQmtinjN2pvesuC9L85jxgTCXUsydgs-v_b1fz0KLAlsBtgWMYmfHP-o8DqECAJw/exec";
@@ -296,95 +315,30 @@ function getColorEjecutivo(asesor){
   return colorEjecutivoMap[asesor];
 }
 
+function parseMonto(val) {
+  if (typeof val === 'number') return isNaN(val) ? 0 : val;
+  if (!val) return 0;
+  var num = parseFloat(String(val).replace(/[^0-9.-]+/g, ""));
+  return isNaN(num) ? 0 : num;
+}
+
 const STATUS_COLORS = { ok:'#22C55E', loading:'#C9A227', error:'#EF4444' };
 function setStatus(type, txt){
   document.getElementById('s-dot').style.background = STATUS_COLORS[type] || '#4B5563';
   document.getElementById('s-txt').textContent = txt;
 }
 
-// CARGAR DATOS
-async function cargarDatos(){
-  if(!SHEET_API_URL) return;
-  setStatus('loading','Actualizando…');
-  try{
-    const r = await fetch(SHEET_API_URL, {cache:'no-store'});
-    const j = await r.json();
-    if(!j.ok) throw new Error(j.error||'Error');
-    
-    FECHA_REPORTE = j.fechaReporte || "Sin fecha";
-    
-    CLIENTES = j.clientes.map(c=>{
-      const valAtrasoNum = parseFloat(c.monto_atraso || c.atraso_monto || c.atraso);
-      const tieneAtraso  = (!isNaN(valAtrasoNum) && valAtrasoNum > 0) || c.atraso === true || String(c.atraso).toUpperCase() === "TRUE";
-      const montoAtrasoFinal = tieneAtraso ? (!isNaN(valAtrasoNum) && valAtrasoNum > 0 ? valAtrasoNum : c.saldo) : 0;
-      const montoPagare = parseFloat(c.pagare || c.monto_pagare) || 0;
-
-      return {
-        ...c, 
-        id: Number(c.id),
-        nombreCliente: c.cliente || c.nombre || c.nombre_cliente || c.razon_social || "CLIENTE S/N",
-        atraso: tieneAtraso,
-        montoAtraso: montoAtrasoFinal,
-        pagare: montoPagare
-      };
-    });
-    PENDIENTES_COUNT = j.pendientes || 0;
-    
-    const btnGeo = document.getElementById('btn-geocodificar');
-    if (PENDIENTES_COUNT > 0) {
-      document.getElementById('geo-count').textContent = `Geocodificar (${PENDIENTES_COUNT})`;
-      btnGeo.classList.remove('hidden');
-    } else {
-      btnGeo.classList.add('hidden');
-    }
-
-    const t = new Date(j.actualizado).toLocaleTimeString('es-MX',{hour:'2-digit',minute:'2-digit'});
-    setStatus('ok', `Google Sheets ✓ ${t} · ${CLIENTES.length} clientes`);
-  }catch(err){
-    console.error(err);
-    setStatus('error','Sin conexión');
-  }
-}
-
-async function ejecutarGeocodificacionAPI() {
-  const modalTxt = document.getElementById('modal-geo-txt');
-  modalTxt.textContent = "Procesando coordenadas en Google Sheets... Por favor espera.";
-  
-  try {
-    const r = await fetch(SHEET_API_URL, {
-      method: 'POST',
-      body: JSON.stringify({ action: "geocodificar" })
-    });
-    const j = await r.json();
-    
-    if (j.ok) {
-      if (j.limiteAlcanzado) {
-        alert(`⚠️ Cuota Diaria Alcanzada\n\n${j.mensaje}`);
-      } else {
-        alert(`✓ ¡Proceso Exitoso!\n\n${j.mensaje}`);
-      }
-    } else {
-      alert(`⚠ Atención: ${j.error}`);
-    }
-  } catch(e) {
-    alert("El proceso se ha puesto en marcha. Si la cuota diaria fue rebasada, el proceso nocturno automático completará las direcciones restantes.");
-  }
-  
-  document.getElementById('modal-geo').classList.remove('open');
-  await cargarDatos();
-  reconstruirMarcadores();
-  render(false);
-}
-
-// MAPA Y LEAFLET
-const map = L.map('map',{zoomControl:true, preferCanvas:true}).setView([19.43,-99.14],10);
-L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',{maxZoom:20}).addTo(map);
+// INICIALIZACIÓN DEL MAPA CON CAPA LIMPIA DE ESRI DARK (SIN MARCA DE AGUA)
+const map = L.map('map',{zoomControl:true, preferCanvas:true}).setView([19.43,-99.14],9);
+L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}',{
+  attribution: 'Tiles &copy; Esri &mdash; Esri, DeLorme, NAVTEQ', maxZoom: 16
+}).addTo(map);
+L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Reference/MapServer/tile/{z}/{y}/{x}',{
+  maxZoom: 16
+}).addTo(map);
 
 const cluster = L.markerClusterGroup({
-  chunkedLoading:true,
-  maxClusterRadius:45,
-  spiderfyOnMaxZoom:true,
-  showCoverageOnHover:false,
+  chunkedLoading:true, maxClusterRadius:45, spiderfyOnMaxZoom:true, showCoverageOnHover:false,
   iconCreateFunction(c){
     const markers = c.getAllChildMarkers();
     const total = markers.length;
@@ -394,26 +348,19 @@ const cluster = L.markerClusterGroup({
     const sz = total > 100 ? 46 : total > 30 ? 40 : 36;
     const bg = tieneMora ? 'rgba(239, 68, 68, 0.92)' : 'rgba(201, 162, 39, 0.85)';
     const border = tieneMora ? '#7F1D1D' : 'rgba(255, 255, 255, 0.2)';
-    const classAnim = tieneMora ? 'cluster-mora' : '';
 
     return L.divIcon({
-      html:`<div class="${classAnim}" style="
-        width:${sz}px; height:${sz}px; border-radius:50%;
-        background:${bg}; border:2px solid ${border};
-        display:flex; flex-direction:column; align-items:center; justify-content:center;
-        font-weight:800; color:#fff; box-shadow:0 4px 12px rgba(0,0,0,.6);
-      ">
-        <span style="font-size:${total>99?10:12}px; line-height:1;">${total}</span>
-        ${tieneMora ? `<span style="font-size:8px; opacity:0.95; margin-top:1px;">🔴 ${morosos}</span>` : ''}
+      html:`<div style="width:${sz}px;height:${sz}px;border-radius:50%;background:${bg};border:2px solid ${border};display:flex;flex-direction:column;align-items:center;justify-content:center;font-weight:800;color:#fff;box-shadow:0 4px 12px rgba(0,0,0,.6);">
+        <span style="font-size:${total>99?10:12}px;line-height:1;">${total}</span>
+        ${tieneMora ? `<span style="font-size:8px;opacity:0.95;margin-top:1px;">🔴 ${morosos}</span>` : ''}
       </div>`,
-      className: '',
-      iconSize: [sz, sz],
+      className: '', iconSize: [sz, sz],
     });
   }
 });
 map.addLayer(cluster);
 
-const fmt = n=>'$'+Number(n).toLocaleString('es-MX',{maximumFractionDigits:0});
+const fmt = n=>'$'+Number(n).toLocaleString('es-MX',{maximumFractionDigits:2, minimumFractionDigits:0});
 
 function popHTML(c){
   const colEjec = getColorEjecutivo(c.asesor);
@@ -424,22 +371,12 @@ function popHTML(c){
       <span class="pop-emp">${c.empresa||'MCM'}</span>
       <span class="pop-id">ID: #${c.id}</span>
     </div>
-    
     <div class="pop-name">${c.nombreCliente}</div>
-    
-    <div class="pop-row">
-      <span class="pop-k">Agencia:</span>
-      <span class="pop-v">${c.agencia||'—'}</span>
-    </div>
-    <div class="pop-row">
-      <span class="pop-k">Asesor / Exec:</span>
-      <span class="pop-v" style="color:${colEjec}">${c.asesor||'—'}</span>
-    </div>
-    
+    <div class="pop-row"><span class="pop-k">Agencia:</span><span class="pop-v">${c.agencia||'—'}</span></div>
+    <div class="pop-row"><span class="pop-k">Asesor:</span><span class="pop-v" style="color:${colEjec}">${c.asesor||'—'}</span></div>
     <div class="pop-saldo-block">
       <div class="pop-saldo-lbl">Saldo Total:</div>
       <div class="${esMora ? 'pop-saldo-red' : 'pop-saldo-green'}">${fmt(c.saldo)}</div>
-
       ${esMora ? `
         <div class="pop-atraso-row">
           <span class="pop-atraso-lbl">VALOR ATRASO:</span>
@@ -461,12 +398,8 @@ function reconstruirMarcadores(){
     const colorBorde = esMora ? '#7F1D1D' : '#070E1A';
 
     const m = L.circleMarker([c.lat,c.lng],{
-      radius: esMora ? 8.5 : 7,
-      color: colorBorde,
-      weight: esMora ? 2.5 : 1.5,
-      fillColor: colorFinal,
-      fillOpacity: 0.95,
-      zIndexOffset: esMora ? 1000 : 0
+      radius: esMora ? 8.5 : 7, color: colorBorde, weight: esMora ? 2.5 : 1.5,
+      fillColor: colorFinal, fillOpacity: 0.95, zIndexOffset: esMora ? 1000 : 0
     });
     m.bindPopup(popHTML(c),{maxWidth:260});
     m.clienteData = c;
@@ -521,8 +454,7 @@ function unicos(campo){
 }
 
 function cuentaConMora(campo, valor){
-  let total = 0;
-  let morosos = 0;
+  let total = 0, morosos = 0;
   CLIENTES.forEach(c => {
     if (filtrosSel.estatus.length) {
       if (filtrosSel.estatus.includes('mora') && !c.atraso) return;
@@ -544,7 +476,6 @@ function cuentaConMora(campo, valor){
 function renderFiltros(){
   const cont = document.getElementById('layers-body');
   cont.innerHTML = '';
-
   let haySeleccion = Object.values(filtrosSel).some(arr => arr.length > 0);
 
   const grpEst = document.createElement('div');
@@ -581,7 +512,6 @@ function renderFiltros(){
 
     const group = document.createElement('div');
     group.className = 'layer-group';
-
     const isOpen = acordeonesState[capa.campo];
     const nSel = filtrosSel[capa.campo].length;
 
@@ -608,7 +538,7 @@ function renderFiltros(){
       lbl.className = 'check-item';
       lbl.innerHTML = `
         <input type="checkbox" ${isChecked ? 'checked' : ''}/>
-        ${colorTag ? `<span class="legend-dot" style="background:${colorTag}"></span>` : ''}
+        ${colorTag ? `<span class="legend-dot" style="background:${colorTag};width:8px;height:8px;border-radius:50%;flex-shrink:0;"></span>` : ''}
         <span class="lbl-txt" title="${v}">${v}</span>
         <span class="lbl-n">${total}</span>
         ${morosos > 0 ? `<span class="lbl-mora">(🔴${morosos})</span>` : ''}
@@ -653,7 +583,6 @@ function toggleEstatus(val) {
   render(true);
 }
 
-// RENDERIZADO DE KPIS INCLUYENDO CARTERA Y PAGARÉ DINÁMICOS
 function renderKPIs(){
   const q = document.getElementById('search').value;
   const datos = filtrados(q);
@@ -691,7 +620,6 @@ function renderKPIs(){
       <div class="kcard"><div class="kk">Clientes</div><div class="kv">${datos.length}</div></div>
       <div class="kcard"><div class="kk">Ejecutivos</div><div class="kv">${Object.keys(porEj).length}</div></div>
       
-      <!-- TARJETA DOBLE: CARTERA TOTAL + SUMATORIA PAGARÉ (COLUMNA M) -->
       <div class="kcard split-card">
         <div>
           <div class="kk">💰 Cartera Total</div>
@@ -703,14 +631,17 @@ function renderKPIs(){
         </div>
       </div>
 
-      <div class="kcard full warn"><div class="kk">🚨 Saldo Total Atraso</div><div class="kv red">${fmt(atrasoTotal)}</div></div>
+      <div class="kcard full warn">
+        <div class="kk">🚨 Saldo Total Atraso (Columna L)</div>
+        <div class="kv red">${fmt(atrasoTotal)}</div>
+      </div>
       
       <div class="kcard"><div class="kk">Saldo Promedio</div><div class="kv sm">${fmt(prom)}</div></div>
       <div class="kcard warn"><div class="kk">% Mora Fin. (S.Atraso/Saldo)</div><div class="kv red sm">${pctMoraFinanciera}%</div></div>
 
       <div class="kcard full${parseFloat(pctClientesMora)>0 ? ' warn':''}">
         <div class="kk">Clientes en Mora / Atraso</div>
-        <div class="kv${parseFloat(pctClientesMora)>0 ? ' red':''} sm">${numMorosos} <span style="font-size:10px;color:#94A3B8;">(${pctClientesMora}% vol)</span></div>
+        <div class="kv${parseFloat(pctClientesMora)>0 ? ' red':''} sm">${numMorosos} <span style="font-size:9.5px;color:#94A3B8;">(${pctClientesMora}% vol)</span></div>
       </div>
     </div>
     
@@ -724,13 +655,13 @@ function renderKPIs(){
 
       return `
       <div class="top-row">
-        <span class="legend-dot" style="background:${col}"></span>
+        <span style="background:${col};width:8px;height:8px;border-radius:50%;flex-shrink:0;"></span>
         <span class="top-name">${nombre}</span>
-        <div class="bar-wrap" style="width:${pctWidth * 0.6}px;">
+        <div class="bar-wrap" style="width:${pctWidth * 0.5}px;">
           <div class="bar-green" style="width:${pctGreen}%;"></div>
           <div class="bar-red" style="width:${pctRed}%;"></div>
         </div>
-        <span class="top-n">${st.total} <span style="color:#94A3B8;font-size:8.5px;">(${st.alDia}/${st.morosos})</span></span>
+        <span class="top-n">${st.total} <span style="color:#94A3B8;font-size:8px;">(${st.alDia}/${st.morosos})</span></span>
       </div>`;
     }).join('')}
   `;
@@ -742,25 +673,134 @@ function render(ajustar=false){
   actualizarMapa(ajustar);
 }
 
-// BUSCADOR CON DEBOUNCE
+// CONTROL DE MINIMIZAR/MAXIMIZAR EN PANTALLAS MÓVILES
+const pLayers = document.getElementById('p-layers');
+const pKpis   = document.getElementById('p-kpis');
+const dockLayers = document.getElementById('dock-layers');
+const dockKpis   = document.getElementById('dock-kpis');
+
+function setupMobilePanels() {
+  if (window.innerWidth <= 768) {
+    // Inician minimizados en móvil
+    pLayers.classList.add('minimized-mobile');
+    pKpis.classList.add('minimized-mobile');
+  } else {
+    pLayers.classList.remove('minimized-mobile');
+    pKpis.classList.remove('minimized-mobile');
+  }
+}
+
+dockLayers.addEventListener('click', () => {
+  const isHidden = pLayers.classList.contains('minimized-mobile');
+  if (isHidden) {
+    pLayers.classList.remove('minimized-mobile');
+    pKpis.classList.add('minimized-mobile'); // Cierra el otro para no saturar la pantalla
+    dockLayers.classList.add('active');
+    dockKpis.classList.remove('active');
+  } else {
+    pLayers.classList.add('minimized-mobile');
+    dockLayers.classList.remove('active');
+  }
+});
+
+dockKpis.addEventListener('click', () => {
+  const isHidden = pKpis.classList.contains('minimized-mobile');
+  if (isHidden) {
+    pKpis.classList.remove('minimized-mobile');
+    pLayers.classList.add('minimized-mobile');
+    dockKpis.classList.add('active');
+    dockLayers.classList.remove('active');
+  } else {
+    pKpis.classList.add('minimized-mobile');
+    dockKpis.classList.remove('active');
+  }
+});
+
+document.getElementById('close-layers').addEventListener('click', () => {
+  if (window.innerWidth <= 768) {
+    pLayers.classList.add('minimized-mobile');
+    dockLayers.classList.remove('active');
+  } else {
+    pLayers.classList.add('hidden');
+  }
+});
+
+document.getElementById('close-kpis').addEventListener('click', () => {
+  if (window.innerWidth <= 768) {
+    pKpis.classList.add('minimized-mobile');
+    dockKpis.classList.remove('active');
+  } else {
+    pKpis.classList.add('hidden');
+  }
+});
+
+window.addEventListener('resize', setupMobilePanels);
+setupMobilePanels();
+
+// CARGA INICIAL
+async function cargarDatos(){
+  if(!SHEET_API_URL) return;
+  setStatus('loading','Actualizando…');
+  try{
+    const r = await fetch(SHEET_API_URL, {cache:'no-store'});
+    const j = await r.json();
+    if(!j.ok) throw new Error(j.error||'Error');
+    
+    FECHA_REPORTE = j.fechaReporte || "Sin fecha";
+    
+    CLIENTES = j.clientes.map(c=>{
+      var montoAtrasoCol = parseMonto(c.montoAtraso !== undefined ? c.montoAtraso : (c.atraso !== undefined ? c.atraso : c.monto_atraso));
+      var tieneAtraso = montoAtrasoCol > 0;
+
+      return {
+        ...c, 
+        id: Number(c.id),
+        nombreCliente: c.cliente || c.nombre || c.nombre_cliente || c.razon_social || "CLIENTE S/N",
+        saldo: parseMonto(c.saldo),
+        atraso: tieneAtraso,
+        montoAtraso: montoAtrasoCol,
+        pagare: parseMonto(c.pagare || c.monto_pagare)
+      };
+    });
+    PENDIENTES_COUNT = j.pendientes || 0;
+    
+    const btnGeo = document.getElementById('btn-geocodificar');
+    if (PENDIENTES_COUNT > 0) {
+      document.getElementById('geo-count').textContent = `Geocodificar (${PENDIENTES_COUNT})`;
+      btnGeo.classList.remove('hidden');
+    } else {
+      btnGeo.classList.add('hidden');
+    }
+
+    const t = new Date(j.actualizado).toLocaleTimeString('es-MX',{hour:'2-digit',minute:'2-digit'});
+    setStatus('ok', `Google Sheets ✓ ${t} · ${CLIENTES.length} clientes`);
+  }catch(err){
+    console.error(err);
+    setStatus('error','Sin conexión');
+  }
+}
+
+// BUSCADOR
 let st;
 document.getElementById('search').addEventListener('input',()=>{
   clearTimeout(st); st = setTimeout(()=>render(false),220);
 });
 
-// EVENTOS DE MODAL Y BOTONES
+// EVENTOS DE GEOCODIFICACIÓN Y REFRESH
 document.getElementById('btn-geocodificar').addEventListener('click', ()=>{
   document.getElementById('modal-geo-txt').textContent = 
-    `Se han detectado ${PENDIENTES_COUNT} registros con dirección que aún no tienen coordenadas. ¿Deseas correr el proceso de geolocalización ahora?`;
+    `Se han detectado ${PENDIENTES_COUNT} registros con dirección sin coordenadas. ¿Deseas procesar ahora?`;
   document.getElementById('modal-geo').classList.add('open');
 });
-
 document.getElementById('btn-modal-cancel').addEventListener('click', ()=>{
   document.getElementById('modal-geo').classList.remove('open');
 });
-
-document.getElementById('btn-modal-confirm').addEventListener('click', ()=>{
-  ejecutarGeocodificacionAPI();
+document.getElementById('btn-modal-confirm').addEventListener('click', async ()=>{
+  document.getElementById('modal-geo').classList.remove('open');
+  await fetch(SHEET_API_URL, { method: 'POST', body: JSON.stringify({ action: "geocodificar" }) });
+  await cargarDatos();
+  reconstruirMarcadores();
+  render(false);
 });
 
 document.getElementById('btn-refresh').addEventListener('click', async ()=>{
