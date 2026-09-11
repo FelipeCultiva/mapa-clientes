@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
-<title>Mapa de Clientes · Acceso Seguro</title>
+<title>Mapa de Clientes · Más con Menos</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"/>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.5.3/MarkerCluster.css"/>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.5.3/MarkerCluster.Default.css"/>
@@ -21,12 +21,13 @@
   --teal:     #2DD4BF;
   --purple:   #818CF8;
   --red:      #EF4444;
+  --mcm-red:  #DC2626;
   --green:    #22C55E;
   --blue:     #38BDF8;
   --text:     #E2E8F0;
   --sub:      #94A3B8;
   --muted:    #4B5563;
-  --r:        11px;
+  --r:        12px;
   --shadow:   0 0 0 1px var(--border), 0 20px 40px rgba(0,0,0,.65);
 }
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -39,30 +40,69 @@ html, body {
 
 #map { position: absolute; inset: 0; z-index: 1; }
 
-/* MODAL DE LOGIN BLOQUEANTE */
+/* PANTALLA DE LOGIN CON FONDO Y MARCA DE AGUA DEL MAPA DE MÉXICO */
 #login-overlay {
-  position: fixed; inset: 0; background: rgba(7,14,26,.97); backdrop-filter: blur(12px);
-  z-index: 3000; display: flex; align-items: center; justify-content: center; padding: 16px;
+  position: fixed; inset: 0; background: #050B14; z-index: 3000;
+  display: flex; align-items: center; justify-content: center; padding: 16px;
+  overflow: hidden;
 }
+
+/* Marca de agua vectorial de la silueta de México */
+#login-overlay::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1000 650' fill='rgba(255,255,255,0.035)'%3E%3Cpath d='M178,135 L215,120 L270,145 L320,130 L380,160 L450,190 L520,240 L550,220 L600,230 L660,260 L730,320 L780,330 L840,310 L890,320 L920,360 L910,410 L870,430 L830,410 L800,430 L760,450 L710,450 L680,470 L640,460 L590,490 L540,470 L480,440 L430,400 L390,360 L360,320 L300,290 L240,240 L190,200 L160,160 Z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: center center;
+  background-size: 85% auto;
+  pointer-events: none;
+}
+
+/* Efecto vignette para profundidad */
+#login-overlay::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at center, transparent 30%, rgba(5,11,20,.85) 80%);
+  pointer-events: none;
+}
+
 #login-card {
-  background: var(--panel); border: 1px solid var(--border); border-radius: 16px;
-  box-shadow: var(--shadow); width: 100%; max-width: 320px; padding: 24px; text-align: center;
+  position: relative; z-index: 10;
+  background: rgba(11,21,37,.94); border: 1px solid rgba(255,255,255,.09);
+  border-radius: 20px; box-shadow: 0 25px 50px -12px rgba(0,0,0,.85), 0 0 0 1px rgba(255,255,255,.08);
+  width: 100%; max-width: 330px; padding: 28px 24px; text-align: center;
+  backdrop-filter: blur(16px);
 }
-.login-title { font-size: 16px; font-weight: 800; color: #fff; margin-bottom: 4px; }
-.login-sub { font-size: 11px; color: var(--sub); margin-bottom: 20px; }
+
+.login-brand-wrap {
+  display: flex; flex-direction: column; align-items: center; margin-bottom: 20px;
+}
+.login-logo {
+  width: 105px; height: auto; object-fit: contain; margin-bottom: 12px;
+  filter: drop-shadow(0 8px 16px rgba(220,38,38,.28));
+}
+.login-title { font-size: 15px; font-weight: 800; color: #fff; letter-spacing: .02em; }
+.login-sub { font-size: 11px; color: var(--sub); margin-top: 3px; }
+
 .login-input {
-  width: 100%; background: rgba(255,255,255,.05); border: 1px solid var(--border);
-  border-radius: 8px; color: var(--text); font-size: 13px; padding: 10px 12px;
-  outline: none; margin-bottom: 12px;
+  width: 100%; background: rgba(255,255,255,.04); border: 1px solid var(--border);
+  border-radius: 9px; color: var(--text); font-size: 13px; padding: 10px 14px;
+  outline: none; margin-bottom: 11px; transition: border-color .15s, background .15s;
 }
-.login-input:focus { border-color: var(--gold); }
+.login-input:focus { border-color: var(--mcm-red); background: rgba(255,255,255,.07); }
 .login-btn {
-  width: 100%; background: var(--gold); color: #000; font-weight: 700; font-size: 13px;
-  padding: 10px 0; border-radius: 8px; border: none; cursor: pointer; transition: .15s; margin-top: 4px;
+  width: 100%; background: linear-gradient(135deg, #EF4444, #B91C1C); color: #fff;
+  font-weight: 700; font-size: 13px; padding: 11px 0; border-radius: 9px; border: none;
+  cursor: pointer; transition: transform .12s, box-shadow .12s; margin-top: 4px;
+  box-shadow: 0 4px 14px rgba(220,38,38,.35);
 }
-.login-btn:hover { background: #E5B82E; }
+.login-btn:hover { transform: translateY(-1px); box-shadow: 0 6px 18px rgba(220,38,38,.45); }
+.login-btn:active { transform: translateY(0); }
 #login-err { font-size: 11px; color: var(--red); margin-top: 10px; display: none; }
 
+/* TOPBAR */
 #topbar {
   position: absolute; top: 0; left: 0; right: 0; height: 54px;
   display: flex; align-items: center; justify-content: space-between; padding: 0 12px;
@@ -96,6 +136,7 @@ html, body {
   font-size: 13px; flex-shrink: 0;
 }
 
+/* PANELES DE DATOS */
 .panel {
   position: absolute; background: rgba(11,21,37,.96); backdrop-filter: blur(14px);
   border: 1px solid var(--border); border-radius: var(--r); box-shadow: var(--shadow);
@@ -145,6 +186,7 @@ html, body {
 .bar-red   { height: 100%; background: var(--red); }
 .top-n { font-family: monospace; font-size: 9px; color: var(--sub); width: 44px; text-align: right; flex-shrink: 0; }
 
+/* POPUP ESTILIZADO */
 .pop { padding: 12px 14px; min-width: 210px; max-width: 250px; }
 .pop-header-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; }
 .pop-id { font-family: monospace; font-size: 10.5px; font-weight: 800; color: var(--gold); background: var(--gold-dim); padding: 2px 6px; border-radius: 4px; }
@@ -165,7 +207,7 @@ html, body {
 
 #mobile-dock { display: none; position: absolute; bottom: 16px; left: 50%; transform: translateX(-50%); z-index: 600; gap: 10px; background: rgba(11,21,37,.95); padding: 5px 8px; border-radius: 30px; border: 1px solid var(--border); backdrop-filter: blur(10px); }
 .dock-btn { background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.1); color: var(--text); padding: 8px 16px; border-radius: 20px; font-size: 12px; font-weight: 600; cursor: pointer; }
-.dock-btn.active { background: var(--gold); color: #000; }
+.dock-btn.active { background: var(--mcm-red); color: #fff; }
 
 @media (max-width: 768px) {
   #mobile-dock { display: flex; }
@@ -176,15 +218,18 @@ html, body {
 </head>
 <body>
 
-<!-- PANTALLA DE ACCESO / LOGIN -->
+<!-- PANTALLA DE ACCESO / LOGIN CORPORATIVO -->
 <div id="login-overlay">
   <div id="login-card">
-    <div class="login-title">Acceso Ejecutivo</div>
-    <div class="login-sub">Ingresa con tu usuario y contraseña</div>
+    <div class="login-brand-wrap">
+      <img class="login-logo" src="logo-mcm.png" alt="Más con Menos" onerror="this.src='https://i.imgur.com/8Q9ZQ8b.png'"/>
+      <div class="login-title">Acceso Inteligencia Comercial</div>
+      <div class="login-sub">Monitoreo y Cartera Territorial</div>
+    </div>
     <form id="form-login" onsubmit="iniciarSesion(event)">
       <input class="login-input" type="text" id="login-user" placeholder="Usuario" autocomplete="username" required/>
       <input class="login-input" type="password" id="login-pass" placeholder="Contraseña" autocomplete="current-password" required/>
-      <button class="login-btn" type="submit" id="btn-ingresar">Ingresar</button>
+      <button class="login-btn" type="submit" id="btn-ingresar">Ingresar al Mapa</button>
       <div id="login-err"></div>
     </form>
   </div>
@@ -195,7 +240,7 @@ html, body {
 <!-- TOPBAR -->
 <div id="topbar">
   <div class="tb-brand">
-    <div id="tb-title">MAPA DE CLIENTES · EJECUTIVO</div>
+    <div id="tb-title">MAPA DE CLIENTES · MÁS CON MENOS</div>
     <div id="tb-status"><span class="s-dot" id="s-dot" style="background:#4B5563"></span><span id="s-txt">Iniciando…</span></div>
   </div>
   <div class="tb-actions">
@@ -290,7 +335,7 @@ map.addLayer(cluster);
 
 // AUTENTICACIÓN
 async function iniciarSesion(event) {
-  event.preventDefault();
+  if (event && event.preventDefault) event.preventDefault();
   const u = document.getElementById('login-user').value.trim();
   const p = document.getElementById('login-pass').value.trim();
   const btn = document.getElementById('btn-ingresar');
@@ -301,11 +346,8 @@ async function iniciarSesion(event) {
   err.style.display = "none";
 
   try {
-    const r = await fetch(SHEET_API_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-      body: JSON.stringify({ action: "login", usuario: u, password: p })
-    });
+    const urlConsulta = `${SHEET_API_URL}?action=login&usuario=${encodeURIComponent(u)}&password=${encodeURIComponent(p)}`;
+    const r = await fetch(urlConsulta, { cache: 'no-store' });
     const j = await r.json();
 
     if (!j.ok) throw new Error(j.error || "Credenciales inválidas.");
@@ -319,9 +361,9 @@ async function iniciarSesion(event) {
     }));
 
     document.getElementById('login-overlay').style.display = "none";
-    document.getElementById('tb-title').textContent = `MAPA · ${j.rol.replace('_',' ')} (${j.filtroAsignado})`;
+    document.getElementById('tb-title').textContent = `MCM · ${j.rol} (${j.filtroAsignado})`;
     document.getElementById('s-dot').style.background = "#22C55E";
-    document.getElementById('s-txt').textContent = `${CLIENTES.length} clientes cargados`;
+    document.getElementById('s-txt').textContent = `${CLIENTES.length} clientes autorizados`;
 
     reconstruirMarcadores();
     render(true);
@@ -329,7 +371,7 @@ async function iniciarSesion(event) {
     err.textContent = e.message;
     err.style.display = "block";
   } finally {
-    btn.textContent = "Ingresar";
+    btn.textContent = "Ingresar al Mapa";
     btn.disabled = false;
   }
 }
@@ -475,9 +517,8 @@ function renderFiltros(){
   ];
 
   CAPAS_CONFIG.forEach(capa => {
-    // Si el usuario es Gerente de Agencia o Regional, ocultar niveles superiores redundantes
-    if (SESION_ACTIVA && SESION_ACTIVA.rol === "GERENTE_AGENCIA" && ['empresa','region','agencia'].includes(capa.campo)) return;
-    if (SESION_ACTIVA && SESION_ACTIVA.rol === "GERENTE_REGIONAL" && ['empresa','region'].includes(capa.campo)) return;
+    if (SESION_ACTIVA && SESION_ACTIVA.rol === "GERENTE DE AGENCIA" && ['empresa','region','agencia'].includes(capa.campo)) return;
+    if (SESION_ACTIVA && SESION_ACTIVA.rol === "GERENTE REGIONAL" && ['empresa','region'].includes(capa.campo)) return;
 
     const vals = unicos(capa.campo);
     if (!vals.length) return;
@@ -613,7 +654,7 @@ function render(ajustar=false){
   actualizarMapa(ajustar);
 }
 
-// DOCK MÓVIL
+// CONTROL DE PANELES MÓVILES
 const pLayers = document.getElementById('p-layers');
 const pKpis   = document.getElementById('p-kpis');
 const dockLayers = document.getElementById('dock-layers');
