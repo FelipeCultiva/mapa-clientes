@@ -222,57 +222,100 @@ html, body {
 <div id="login-overlay">
   <div id="login-card">
     <div class="login-brand-wrap">
-      <div class="login-logo-wrap" style="margin-bottom: 12px; display: flex; justify-content: center;">
-        <svg width="120" height="90" viewBox="0 0 240 180" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <!-- Efecto Glow Central -->
-          <circle cx="120" cy="85" r="70" fill="radial-gradient(circle, rgba(220,38,38,0.2) 0%, transparent 70%)"/>
-          
-          <!-- Cabeza roja superior -->
-          <circle cx="125" cy="40" r="22" fill="url(#gradRedHead)" filter="drop-shadow(0 4px 8px rgba(0,0,0,0.5))"/>
-          <ellipse cx="120" cy="30" rx="9" ry="5" fill="rgba(255,255,255,0.4)"/>
-          
-          <!-- Cuerpo CROMO estilizado -->
-          <path d="M90 70 C80 85, 80 115, 95 130 C110 145, 140 145, 155 130 C165 120, 168 105, 155 98 C145 92, 130 95, 125 105 C120 115, 110 115, 105 108 C100 100, 102 85, 115 78 C128 72, 145 75, 158 85 L170 70 C150 55, 120 52, 95 65 Z" fill="url(#gradChrome)" filter="drop-shadow(0 6px 12px rgba(0,0,0,0.6))"/>
-          
-          <!-- Esfera (+) Roja Izquierda -->
-          <circle cx="65" cy="95" r="26" fill="url(#gradRedBtn)" filter="drop-shadow(0 4px 10px rgba(220,38,38,0.4))"/>
-          <ellipse cx="58" cy="82" rx="10" ry="5" fill="rgba(255,255,255,0.5)"/>
-          <rect x="53" y="92" width="24" height="6" rx="2" fill="#FFFFFF"/>
-          <rect x="62" y="83" width="6" height="24" rx="2" fill="#FFFFFF"/>
-      
-          <!-- Esfera (-) Roja Derecha -->
-          <circle cx="180" cy="105" r="20" fill="url(#gradRedBtn)" filter="drop-shadow(0 4px 10px rgba(220,38,38,0.4))"/>
-          <ellipse cx="174" cy="95" rx="8" ry="4" fill="rgba(255,255,255,0.5)"/>
-          <rect x="170" y="102" width="20" height="5.5" rx="2" fill="#FFFFFF"/>
-          
-          <!-- Texto Inferior Estilizado -->
-          <text x="120" y="172" text-anchor="middle" font-family="'Inter', sans-serif" font-weight="900" font-size="20" fill="#EF4444" letter-spacing="1">
-            MÁS <tspan fill="#94A3B8" font-size="14" font-weight="600">con</tspan> MENOS
-          </text>
-      
-          <!-- Gradientes corporativos -->
+      <!-- LOGO VECTORIAL IDÉNTICO AL ORIGINAL -->
+      <div style="display:flex; justify-content:center; margin-bottom: 8px;">
+        <svg width="150" height="135" viewBox="0 0 320 280" fill="none" xmlns="http://www.w3.org/2000/svg">
           <defs>
-            <linearGradient id="gradRedHead" x1="105" y1="20" x2="145" y2="60" gradientUnits="userSpaceOnUse">
-              <stop stop-color="#FF4D4D"/>
-              <stop offset="0.6" stop-color="#DC2626"/>
-              <stop offset="1" stop-color="#7F1D1D"/>
+            <!-- Gradiente Cromado Sólido (Plata brillante a metal oscuro) -->
+            <linearGradient id="mcmSilver" x1="80" y1="70" x2="240" y2="210" gradientUnits="userSpaceOnUse">
+              <stop offset="0%" stop-color="#FFFFFF"/>
+              <stop offset="18%" stop-color="#E2E8F0"/>
+              <stop offset="45%" stop-color="#94A3B8"/>
+              <stop offset="70%" stop-color="#475569"/>
+              <stop offset="90%" stop-color="#1E293B"/>
+              <stop offset="100%" stop-color="#0F172A"/>
             </linearGradient>
-            <linearGradient id="gradRedBtn" x1="45" y1="75" x2="85" y2="115" gradientUnits="userSpaceOnUse">
-              <stop stop-color="#FF5C5C"/>
-              <stop offset="0.6" stop-color="#DC2626"/>
-              <stop offset="1" stop-color="#991B1B"/>
+
+            <!-- Bisel 3D borde cromado -->
+            <linearGradient id="mcmSilverStroke" x1="160" y1="60" x2="160" y2="215" gradientUnits="userSpaceOnUse">
+              <stop offset="0%" stop-color="#FFFFFF" stop-opacity="0.9"/>
+              <stop offset="50%" stop-color="#64748B"/>
+              <stop offset="100%" stop-color="#0F172A"/>
             </linearGradient>
-            <linearGradient id="gradChrome" x1="80" y1="60" x2="170" y2="140" gradientUnits="userSpaceOnUse">
-              <stop stop-color="#FFFFFF"/>
-              <stop offset="0.2" stop-color="#CBD5E1"/>
-              <stop offset="0.5" stop-color="#475569"/>
-              <stop offset="0.8" stop-color="#1E293B"/>
-              <stop offset="1" stop-color="#0F172A"/>
-            </linearGradient>
+
+            <!-- Esferas Rojas Brillantes -->
+            <radialGradient id="mcmRedSphere" cx="35%" cy="30%" r="70%">
+              <stop offset="0%" stop-color="#FFA4A4"/>
+              <stop offset="25%" stop-color="#EF4444"/>
+              <stop offset="70%" stop-color="#B91C1C"/>
+              <stop offset="100%" stop-color="#5B0606"/>
+            </radialGradient>
+
+            <!-- Filtro de sombra profunda -->
+            <filter id="mcmShadow" x="-15%" y="-15%" width="135%" height="135%">
+              <feDropShadow dx="0" dy="8" stdDeviation="6" flood-color="#000000" flood-opacity="0.65"/>
+            </filter>
           </defs>
+
+          <!-- 1. ESFERA ROJA SUPERIOR (Cabeza) -->
+          <g filter="url(#mcmShadow)">
+            <circle cx="170" cy="65" r="34" fill="url(#mcmRedSphere)"/>
+            <ellipse cx="160" cy="50" rx="14" ry="7" fill="#FFFFFF" opacity="0.45"/>
+          </g>
+
+          <!-- 2. CUERPO CROMADO CERRADO (Plata con cavidad interna) -->
+          <g filter="url(#mcmShadow)">
+            <!-- Silueta exterior cerrada -->
+            <path d="M125,98 
+                     C135,92 195,80 230,115 
+                     C250,135 240,170 215,190 
+                     C195,208 160,215 145,212 
+                     C120,208 100,185 105,150 
+                     C108,125 115,105 125,98 Z" 
+                  fill="url(#mcmSilver)" 
+                  stroke="url(#mcmSilverStroke)" 
+                  stroke-width="3"/>
+
+            <!-- Relieve interior plateado -->
+            <path d="M152,118 
+                     C175,110 205,125 205,150 
+                     C205,172 178,185 160,180 
+                     C145,176 138,162 142,145 
+                     C145,130 148,120 152,118 Z" 
+                  fill="#0F172A" 
+                  opacity="0.85"/>
+            
+            <path d="M155,124 
+                     C170,118 195,130 195,148 
+                     C195,165 174,174 162,170 
+                     C152,166 148,155 150,142 Z" 
+                  fill="url(#mcmSilver)"/>
+          </g>
+
+          <!-- 3. ESFERA ROJA (+) IZQUIERDA -->
+          <g filter="url(#mcmShadow)">
+            <circle cx="85" cy="125" r="38" fill="url(#mcmRedSphere)"/>
+            <ellipse cx="75" cy="108" rx="16" ry="8" fill="#FFFFFF" opacity="0.45"/>
+            <!-- Signo + Blanco 3D -->
+            <rect x="68" y="120" width="34" height="10" rx="3" fill="#FFFFFF"/>
+            <rect x="80" y="108" width="10" height="34" rx="3" fill="#FFFFFF"/>
+          </g>
+
+          <!-- 4. ESFERA ROJA (-) DERECHA -->
+          <g filter="url(#mcmShadow)">
+            <circle cx="245" cy="140" r="30" fill="url(#mcmRedSphere)"/>
+            <ellipse cx="236" cy="126" rx="12" ry="6" fill="#FFFFFF" opacity="0.45"/>
+            <!-- Signo - Blanco 3D -->
+            <rect x="230" y="135" width="30" height="9" rx="2.5" fill="#FFFFFF"/>
+          </g>
+
+          <!-- 5. TEXTO CORPORATIVO "Más con Menos" -->
+          <text x="160" y="255" text-anchor="middle" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-weight="900" font-size="28" fill="#EF4444" stroke="#7F1D1D" stroke-width="0.8" letter-spacing="0.5">
+            Más <tspan fill="#CBD5E1" font-size="20" font-weight="700" stroke="none">con</tspan> Menos
+          </text>
         </svg>
       </div>
-      <img class="login-logo" src="logo-mcm.png" alt="Más con Menos" onerror="this.src='https://i.imgur.com/8Q9ZQ8b.png'"/>
+
       <div class="login-title">Acceso Inteligencia Comercial</div>
       <div class="login-sub">Monitoreo y Cartera Territorial</div>
     </div>
