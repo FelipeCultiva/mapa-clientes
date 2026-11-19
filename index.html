@@ -214,6 +214,29 @@ html, body {
   .panel { top: auto !important; left: 10px !important; right: 10px !important; bottom: 68px !important; width: auto !important; max-height: 65dvh !important; border-radius: 16px !important; }
   .panel.minimized-mobile { display: none !important; }
 }
+/* MODAL SPINNER DE GEOCODIFICACIÓN */
+#geo-loader {
+  position: fixed; inset: 0; background: rgba(7, 14, 26, 0.85); backdrop-filter: blur(6px);
+  z-index: 4000; display: none; align-items: center; justify-content: center; padding: 16px;
+}
+#geo-loader.active { display: flex; }
+.geo-loader-card {
+  background: var(--panel); border: 1px solid var(--gold-ring); border-radius: 16px;
+  box-shadow: var(--shadow); width: 100%; max-width: 320px; padding: 24px 20px; text-align: center;
+}
+.geo-spinner {
+  width: 44px; height: 44px; border: 4px solid rgba(201, 162, 39, 0.2);
+  border-top-color: var(--gold); border-radius: 50%; margin: 0 auto 14px;
+  animation: spin 0.8s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+.geo-loader-title { font-size: 14.5px; font-weight: 800; color: #fff; margin-bottom: 6px; }
+.geo-loader-desc { font-size: 11.5px; color: var(--sub); line-height: 1.4; margin-bottom: 12px; }
+.geo-timer {
+  display: inline-block; font-family: monospace; font-size: 13px; font-weight: 700;
+  color: var(--gold); background: var(--gold-dim); padding: 4px 12px; border-radius: 20px;
+  border: 1px solid var(--gold-ring);
+}
 </style>
 </head>
 <body>
@@ -315,6 +338,16 @@ html, body {
 
 <div id="map"></div>
 
+<!-- OVERLAY DE PROGRESO PARA GEOCODIFICACIÓN -->
+<div id="geo-loader">
+  <div class="geo-loader-card">
+    <div class="geo-spinner"></div>
+    <div class="geo-loader-title">Geocodificando Direcciones</div>
+    <div class="geo-loader-desc">Procesando lote de hasta 200 registros en Google Sheets. Por favor no cierres esta ventana.</div>
+    <div class="geo-timer">Tiempo: <span id="geo-seconds">0</span>s</div>
+  </div>
+</div>
+  
 <!-- TOPBAR -->
 <div id="topbar">
   <div class="tb-brand">
@@ -811,12 +844,21 @@ document.getElementById('btn-refresh').addEventListener('click', async ()=>{
 
 document.getElementById('btn-geocodificar').addEventListener('click', async () => {
   const btnGeo = document.getElementById('btn-geocodificar');
-  const txtOriginal = document.getElementById('geo-count').textContent;
-  
+  const loader = document.getElementById('geo-loader');
+  const secSpan = document.getElementById('geo-seconds');
+
   if (!confirm("Se iniciará la geocodificación por lotes (hasta 200 direcciones por clic para proteger la cuota diaria de Google). ¿Continuar?")) return;
 
   btnGeo.disabled = true;
-  document.getElementById('geo-count').textContent = "Procesando lote...";
+  let segundos = 0;
+  secSpan.textContent = "0";
+  loader.classList.add('active');
+
+  // Inicia contador de segundos transcurridos
+  const intervalo = setInterval(() => {
+    segundos++;
+    secSpan.textContent = segundos;
+  }, 1000);
 
   try {
     const r = await fetch(SHEET_API_URL, {
@@ -825,13 +867,21 @@ document.getElementById('btn-geocodificar').addEventListener('click', async () =
       body: JSON.stringify({ action: "geocodificar" })
     });
     const j = await r.json();
+    
+    clearInterval(intervalo);
+    loader.classList.remove('active');
+    
     alert(j.ok ? `✓ ${j.mensaje}` : `⚠ ${j.error}`);
     
-    // Recargar los datos del mapa para mostrar los nuevos puntos
+    // Recargar datos para actualizar el mapa y el contador del botón
     await iniciarSesion({ preventDefault: () => {} });
   } catch (err) {
-    alert("El lote se envió a procesar en segundo plano. Actualiza en unos segundos.");
+    clearInterval(intervalo);
+    loader.classList.remove('active');
+    alert("El proceso sigue ejecutándose en Google Sheets (toma aprox. 1 minuto por lote). Haz clic en el botón de actualizar (⟳) en unos momentos.");
   } finally {
+    clearInterval(intervalo);
+    loader.classList.remove('active');
     btnGeo.disabled = false;
   }
 });
