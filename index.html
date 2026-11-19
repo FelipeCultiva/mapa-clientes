@@ -438,6 +438,15 @@ async function iniciarSesion(event) {
       nombreCliente: c.cliente || c.nombre || c.nombre_cliente || c.razon_social || "CLIENTE S/N"
     }));
 
+    // Reactivar el botón de geocodificación si hay registros sin coordenadas
+    const btnGeo = document.getElementById('btn-geocodificar');
+    if (j.pendientes > 0 && j.rol === "DIRECTOR COMERCIAL") {
+      document.getElementById('geo-count').textContent = `Geocodificar (${j.pendientes})`;
+      btnGeo.classList.remove('hidden');
+    } else {
+      btnGeo.classList.add('hidden');
+    }
+    
     document.getElementById('login-overlay').style.display = "none";
     document.getElementById('tb-title').textContent = `MCM · ${j.rol} (${j.filtroAsignado})`;
     document.getElementById('s-dot').style.background = "#22C55E";
@@ -799,6 +808,33 @@ document.getElementById('btn-refresh').addEventListener('click', async ()=>{
     await iniciarSesion({ preventDefault: () => {} });
     setTimeout(() => btn.classList.remove('spinning'), 600);
   }
+
+document.getElementById('btn-geocodificar').addEventListener('click', async () => {
+  const btnGeo = document.getElementById('btn-geocodificar');
+  const txtOriginal = document.getElementById('geo-count').textContent;
+  
+  if (!confirm("Se iniciará la geocodificación por lotes (hasta 200 direcciones por clic para proteger la cuota diaria de Google). ¿Continuar?")) return;
+
+  btnGeo.disabled = true;
+  document.getElementById('geo-count').textContent = "Procesando lote...";
+
+  try {
+    const r = await fetch(SHEET_API_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify({ action: "geocodificar" })
+    });
+    const j = await r.json();
+    alert(j.ok ? `✓ ${j.mensaje}` : `⚠ ${j.error}`);
+    
+    // Recargar los datos del mapa para mostrar los nuevos puntos
+    await iniciarSesion({ preventDefault: () => {} });
+  } catch (err) {
+    alert("El lote se envió a procesar en segundo plano. Actualiza en unos segundos.");
+  } finally {
+    btnGeo.disabled = false;
+  }
+});
 });
 </script>
 </body>
